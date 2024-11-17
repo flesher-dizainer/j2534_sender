@@ -1,0 +1,75 @@
+<ecus>
+	<M86 maker_name = 'M86' system = 'Engine'>
+		<read_param_01 	name = 'read_param_01' Data = '000007E8620001' DataRead = '000007E0220001'>
+			<UBAT        number_data = "8" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "0,1" add = "0" 				name = "Напряжение батареи" ></UBAT>
+			<TWAT        number_data = "10" type = "0" count = "2" number_bit = "00" mul_h = "1" mul_l = "0,75" add = "48" 			name = "Температура охлаждающей жидкости" ></TWAT>
+			<FREQ        number_data = "12" type = "0" count = "2" number_bit = "00" mul_h = "64" mul_l = "0,25" add = "0" 			name = "Обороты  двигателя" ></FREQ>
+			<VSPEED      number_data = "13" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "1,25" add = "0" 				name = "Скорость автомобиля" ></VSPEED>
+			<UOZ         number_data = "14" type = "1" count = "1" number_bit = "00" mul_h = "1" mul_l = "0,75" add = "0" 			    name = "Угол опережения зажигания" ></UOZ>
+			<INJ         number_data = "16" type = "0" count = "2" number_bit = "00" mul_h = "1,6384" mul_l = "0,0064" add = "0" 		name = "Длительность импульса впрыска" ></INJ>
+			<THR         number_data = "18" type = "0" count = "2" number_bit = "00" mul_h = "6,2464" mul_l = "0,0244" add = "0" 		name = "Положение дроссельной заслонки" ></THR>
+			<APP         number_data = "20" type = "0" count = "2" number_bit = "00" mul_h = "0,3906" mul_l = "0,0015" add = "0" 		name = "Положение педали газа" ></APP>
+			<ACHRG_REL   number_data = "22" type = "0" count = "2" number_bit = "00" mul_h = "6" mul_l = "0,0234" add = "0" 			name = "Относительное заполнение воздухом" ></ACHRG_REL>
+			<AIR		 number_data = "24" type=  "0" count=  "2" number_bit = "00" mul_h = "25,6" mul_l="0,1" add="0" 				name = "Массовый расход воздуха"></AIR>
+			<LAMSBG      number_data = "25" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "0,00392" add = "-0,5" 		name = "Желаемое значение коэффициента лямбда" ></LAMSBG>
+			<O2S1        number_data = "26" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "0,005" add = "0" 			name = "Напряжение датчика кислорода 1" ></O2S1>
+			<O2S1_CYCLE  number_data = "27" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "1" add = "0" 				name = "Период сигнала датчика кислорода 1" ></O2S1_CYCLE>
+			<O2S2        number_data = "28" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "0,005" add = "0" 			name = "Напряжение датчика кислорода 2" ></O2S2>
+			<INJCRR      number_data = "30" type = "0" count = "2" number_bit = "00" mul_h = "0,0078125" mul_l = "0,00003" add = "0" 	name = "Текущий коэффициент коррекции длительности впрыска топлива" ></INJCRR>
+			<FHO         number_data = "31" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "1" add = "0" 				name = "Фактор высотной коррекции" ></FHO>
+			<MSLEAK      number_data = "32" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "1" add = "0" 				name = "Адаптированное отклонение расхода воздуха во впускном колекторе мимо дросселя" ></MSLEAK>
+			<FRA         number_data = "35" type = "0" count = "2" number_bit = "00" mul_h = "0,0078125" mul_l = "0,00003" add = "0" 	name = "Мультипликативная коррекция смеси самообучением" ></FRA>
+			<IAT         number_data = "40" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "0,75" add = "48" 			name = "Температура впускного воздуха" ></IAT>
+			<PURGE       number_data = "42" type = "0" count = "2" number_bit = "00" mul_h = "0,3906" mul_l = "0,0015" add = "0" 		name = "Коэффициент продувки адсорбера" ></PURGE>
+			<FUCOTE      number_data = "43" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "1" add = "0" 				name = "Концентрация топлива в адсорбере" ></FUCOTE>
+			<WKR         number_data = "45" type = "1" count = "1" number_bit = "00" mul_h = "1" mul_l = "0,75" add = "0" 				name = "Величина отскока УОЗ при детонации" ></WKR>
+			<FREQX       number_data = "46" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "10" add = "0" 				name = "Желаемые обороты холостого хода" ></FREQX>
+			<DMVAD       number_data = "48" type = "0" count = "2" number_bit = "00" mul_h = "0,781" mul_l = "0,003" add = "0" 		name = "Разница крутящего момента от адаптированного крутящего момента" ></DMVAD>
+			<MSNDKO      number_data = "50" type = "0" count = "2" number_bit = "00" mul_h = "25,6" mul_l = "0,1" add = "0" 			name = "Нормальная утечка воздуха через дроссель" ></MSNDKO>
+			<DMLLRI      number_data = "52" type = "0" count = "2" number_bit = "00" mul_h = "0,781" mul_l = "0,003" add = "0" 		name = "Потребность в моменте для регулирования ХХ: I-часть" ></DMLLRI>
+			<DMLLR       number_data = "54" type = "0" count = "2" number_bit = "00" mul_h = "0,781" mul_l = "0,003" add = "0" 		name = "Потребность в моменте для регулирования ХХ: PD-часть" ></DMLLR>
+			<TWATST      number_data = "55" type = "0" count = "1" number_bit = "00" mul_h = "1" mul_l = "0,75" add = "48" 			name = "ТОЖ при пуске" ></TWATST>
+			<NEUTRDY     number_data = "56" type = "2" count = "1" number_bit = "$01" mul_h = "1" mul_l = "1" add = "0" name = "Проверка нейтрализатора завершена" ></NEUTRDY>
+			<BVTPSRDY    number_data = "56" type = "2" count = "1" number_bit = "$04" mul_h = "1" mul_l = "1" add = "0" name = "Проверка системы улавливания паров бензина завершена" ></BVTPSRDY>
+			<O2S1RDY     number_data = "56" type = "2" count = "1" number_bit = "$20" mul_h = "1" mul_l = "1" add = "0" name = "Проверка первого датчика кислорода завершена" ></O2S1RDY>
+			<O2S2RDY     number_data = "56" type = "2" count = "1" number_bit = "$40" mul_h = "1" mul_l = "1" add = "0" name = "Проверка второго датчика кислорода завершена" ></O2S2RDY>
+			<FPUMPREL    number_data = "58" type = "2" count = "1" number_bit = "$01" mul_h = "1" mul_l = "1" add = "0" name = "Реле бензонасоса" ></FPUMPREL>
+			<B_BREMS2    number_data = "58" type = "2" count = "1" number_bit = "$02" mul_h = "1" mul_l = "1" add = "0" name = "Флаг нажатия педали тормоза 2" ></B_BREMS2>
+			<B_KUPPL     number_data = "58" type = "2" count = "1" number_bit = "$04" mul_h = "1" mul_l = "1" add = "0" name = "Флаг нажатия педали сцепления" ></B_KUPPL>
+			<FAN_1       number_data = "58" type = "2" count = "1" number_bit = "$40" mul_h = "1" mul_l = "1" add = "0" name = "Реле вентилятора охлаждения 1" ></FAN_1>
+			<FAN_2       number_data = "58" type = "2" count = "1" number_bit = "$80" mul_h = "1" mul_l = "1" add = "0" name = "Реле вентилятора охлаждения 2" ></FAN_2>
+			<IDLE        number_data = "59" type = "2" count = "1" number_bit = "$01" mul_h = "1" mul_l = "1" add = "0" name = "Холостой ход" ></IDLE>
+			<FLOAD       number_data = "59" type = "2" count = "1" number_bit = "$02" mul_h = "1" mul_l = "1" add = "0" name = "Признак обогащения по мощности " ></FLOAD>
+			<PURGEON     number_data = "59" type = "2" count = "1" number_bit = "$04" mul_h = "1" mul_l = "1" add = "0" name = "Продувка адсорбера активирована" ></PURGEON>
+			<O2S1_READY  number_data = "59" type = "2" count = "1" number_bit = "$08" mul_h = "1" mul_l = "1" add = "0" name = "Готовность датчика кислорода 1" ></O2S1_READY>
+			<FSYS_O2S1   number_data = "59" type = "2" count = "1" number_bit = "$10" mul_h = "1" mul_l = "1" add = "0" name = "Флаг обратной связи по датчику кислорода 1" ></FSYS_O2S1>
+			<O2S2_READY  number_data = "59" type = "2" count = "1" number_bit = "$20" mul_h = "1" mul_l = "1" add = "0" name = "Готовность датчика кислорода 2" ></O2S2_READY>
+			<FSYS_O2S2   number_data = "59" type = "2" count = "1" number_bit = "$40" mul_h = "1" mul_l = "1" add = "0" name = "Обратная связь по датчику кислорода 2" ></FSYS_O2S2>
+			<B_LRA       number_data = "59" type = "2" count = "1" number_bit = "$80" mul_h = "1" mul_l = "1" add = "0" name = "Признак разрешения адаптации топливоподачи" ></B_LRA>
+			<FCUT        number_data = "60" type = "2" count = "1" number_bit = "$01" mul_h = "1" mul_l = "1" add = "0" name = "Отсечка топливоподачи" ></FCUT>
+			<KR          number_data = "60" type = "2" count = "1" number_bit = "$02" mul_h = "1" mul_l = "1" add = "0" name = "Контроль детонации активен" ></KR>
+			<B_KRDY      number_data = "60" type = "2" count = "1" number_bit = "$04" mul_h = "1" mul_l = "1" add = "0" name = "Динамический счетчик не равен нулю" ></B_KRDY>
+			<LUSTOP      number_data = "60" type = "2" count = "1" number_bit = "$08" mul_h = "1" mul_l = "1" add = "0" name = "Обнаружение пропусков зажигания приостановлено" ></LUSTOP>
+			<SWE         number_data = "60" type = "2" count = "1" number_bit = "$10" mul_h = "1" mul_l = "1" add = "0" name = "Признак обнаружения неровной дороги" ></SWE>
+			<B_BREMS1    number_data = "60" type = "2" count = "1" number_bit = "$20" mul_h = "1" mul_l = "1" add = "0" name = "Флаг нажатия педали тормоза 1" ></B_BREMS1>
+			<MIL         number_data = "60" type = "2" count = "1" number_bit = "$80" mul_h = "1" mul_l = "1" add = "0" name = "Лампа индикации неисправностей" ></MIL>
+			<IAV_ST      number_data = "66" type = "2" count = "1" number_bit = "$02" mul_h = "1" mul_l = "1" add = "0" name = "Клапан управления длиной каналов системы впуска" ></IAV_ST>
+			<MAP_DCF     number_data = "68" type = "0" count = "2" number_bit = "00" mul_h = "16" mul_l = "0,0625" add = "0" name = "GBC_MAP" ></MAP_DCF>
+			<MAP_SAM     number_data = "70" type = "0" count = "2" number_bit = "00" mul_h = "16" mul_l = "0,0625" add = "0" name = "Pressure Air Intake" ></MAP_SAM>
+			<WBO	     number_data = "71" type = "0" count = "1" number_bit = "00" mul_h = "1"  mul_l = "0,1" add = "0" name = "WBO_AFR" ></WBO>
+		
+		</read_param_01>
+	</M86>
+	<OBDII maker_name = 'STD_OBDII' system = 'Engine'>
+		<Load 	name = 'Engine Load' Data = '000007E84104' DataRead = '000007E00104'>
+			<Engine_Load	number_data = "8" type = "0" count = "1" number_bit = "00" mul = "0,392" add = "0" name = "Расчётная нагрузка ДВС" ></Engine_Load>
+		</Load>
+		<TWAT 	name = 'Engine TWAT' Data = '000007E84105' DataRead = '000007E00105'>
+			<Engine_TWAT	number_data = "8" type = "0" count = "1" number_bit = "00" mul = "1" add = "40" name = "Температура ОЖ ДВС" ></Engine_TWAT>
+		</TWAT>
+		<SFT 	name = 'Short_Fuel_Trim' Data = '000007E84106' DataRead = '000007E00106'>
+			<Short_Fuel_Trim	number_data = "8" type = "0" count = "1" number_bit = "00" mul = "0,781" add = "-100" name = "Кратквременная балансировка топлива" ></Short_Fuel_Trim>
+		</SFT>
+	</OBDII>
+
+</ecus>

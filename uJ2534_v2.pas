@@ -1,4 +1,4 @@
-unit uJ2534_v2;
+п»їunit uJ2534_v2;
 
 interface
 
@@ -9,25 +9,46 @@ uses
   Registry;
 
 type
+  TProtocolID = record
+  const
+    CAN = $05;
+    ISO15765 = $06;
+  end;
+
+type
+  TBaudRate = record
+  const
+    BaudRate = 500000;
+  end;
+
+type
+  TFilterMSG = record
+  const
+    MaskMsg: array [0 .. 3] of byte = ($0, $0, $07, $e8);
+    PatternMsg: array [0 .. 3] of byte = (0, 0, $07, $E8);
+    FlowControlMsg: array [0 .. 3] of byte = (0, 0, $07, $E0);
+  end;
+
+type
   TFLAGS = record
   const
-    CONNECT_FLAGS_CAN_11BIT_ID: longWord = 0;
-    TRANSMITT_FLAGS_ISO15765_FRAME_PAD: longWord = $00000040;
-    FILTER_TYPE_FLOW_CONTROL_FILTER: longWord = 3;
+    CONNECT_FLAGS_CAN_11BIT_ID = 0;
+    TRANSMITT_FLAGS_ISO15765_FRAME_PAD = $40;
+    FILTER_TYPE_FLOW_CONTROL_FILTER = 3;
   end;
 
-  { -----данные протокола, ид канала и т.п }
+  { -----РґР°РЅРЅС‹Рµ РїСЂРѕС‚РѕРєРѕР»Р°, РёРґ РєР°РЅР°Р»Р° Рё С‚.Рї }
 type
   TDIAG = record
-    Device_ID: longWord; // идент устройства
-    ProtocilID: longWord; // идент протокола связи
-    Flags: longWord; // флаги соединения
-    Baudrate: longWord; // скорость связи
-    ChannelID: longWord; // идент канала связи
-    FilterID: longWord; // идент фильтра, нужен для удаления фильтра
+    Device_ID: longWord; // РёРґРµРЅС‚ СѓСЃС‚СЂРѕР№СЃС‚РІР°
+    ProtocilID: longWord; // РёРґРµРЅС‚ РїСЂРѕС‚РѕРєРѕР»Р° СЃРІСЏР·Рё
+    Flags: longWord; // С„Р»Р°РіРё СЃРѕРµРґРёРЅРµРЅРёСЏ
+    BaudRate: longWord; // СЃРєРѕСЂРѕСЃС‚СЊ СЃРІСЏР·Рё
+    ChannelID: longWord; // РёРґРµРЅС‚ РєР°РЅР°Р»Р° СЃРІСЏР·Рё
+    FilterID: longWord; // РёРґРµРЅС‚ С„РёР»СЊС‚СЂР°, РЅСѓР¶РµРЅ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ С„РёР»СЊС‚СЂР°
   end;
 
-  { --- структура сообщения --- }
+  { --- СЃС‚СЂСѓРєС‚СѓСЂР° СЃРѕРѕР±С‰РµРЅРёСЏ --- }
 type
   TPASSTHRU_MSG = record
     ProtocolID: longWord; // vehicle network protocol
@@ -37,122 +58,123 @@ type
     DataSize: longWord; // byte size of message payload in the Data array
     ExtraDataIndex: longWord;
     // start of extra data (i.e. CRC, checksum, etc) in Data array
-    Data: array [0 .. 4127] of Byte; // message payload or data
+    Data: array [0 .. 4127] of byte; // message payload or data
   end;
 
 type
-  // Определение массива ошибок, доступного внешним методам
+  // РћРїСЂРµРґРµР»РµРЅРёРµ РјР°СЃСЃРёРІР° РѕС€РёР±РѕРє, РґРѕСЃС‚СѓРїРЅРѕРіРѕ РІРЅРµС€РЅРёРј РјРµС‚РѕРґР°Рј
   TERROR_MESS = array [0 .. $1A] of string;
 
   TJ2534_v2 = class
   private
-    // открыть шлюз связи с адаптером
-    TPassThruOpen: function(Name: PChar; DeviceID: PLongWord): Byte; stdcall;
-    // закрыть шлюз связи с адаптером
-    TPassThruClose: function(DeviceID: longWord): Byte; stdcall;
-    // Установка соединения по протоколу
+    // РѕС‚РєСЂС‹С‚СЊ С€Р»СЋР· СЃРІСЏР·Рё СЃ Р°РґР°РїС‚РµСЂРѕРј
+    TPassThruOpen: function(Name: PChar; DeviceID: PLongWord): byte; stdcall;
+    // Р·Р°РєСЂС‹С‚СЊ С€Р»СЋР· СЃРІСЏР·Рё СЃ Р°РґР°РїС‚РµСЂРѕРј
+    TPassThruClose: function(DeviceID: longWord): byte; stdcall;
+    // РЈСЃС‚Р°РЅРѕРІРєР° СЃРѕРµРґРёРЅРµРЅРёСЏ РїРѕ РїСЂРѕС‚РѕРєРѕР»Сѓ
     TPassThruConnect: function(DeviceID: longWord; ProtocolID: longWord;
-      Flags: longWord; Baudrate: longWord; pChannelID: PLongWord)
+      Flags: longWord; BaudRate: longWord; pChannelID: PLongWord)
       : integer; stdcall;
-    // разьединение связи
-    TPassThruDisconnect: function(DeviceID: longWord): Byte; stdcall;
-    // Чтение принятого пакета  ChannelID - идентификатор канала
+    // СЂР°Р·СЊРµРґРёРЅРµРЅРёРµ СЃРІСЏР·Рё
+    TPassThruDisconnect: function(DeviceID: longWord): byte; stdcall;
+    // Р§С‚РµРЅРёРµ РїСЂРёРЅСЏС‚РѕРіРѕ РїР°РєРµС‚Р°  ChannelID - РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РєР°РЅР°Р»Р°
     TPassThruReadMsgs: function(ChannelID: longWord; TPASSTHRU_MSG_: pointer;
       pNumMsgs: Pint; Timeout: longWord): integer; stdcall;
-    // отправка сообщения адаптеру
+    // РѕС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ Р°РґР°РїС‚РµСЂСѓ
     TPassThruWriteMsgs: function(ChannelID: longWord; TPASSTHRU_MSG_: pointer;
       pNumMsgs: Pint; Timeout: longWord): integer; stdcall;
-    // установка фильтра сообщения
+    // СѓСЃС‚Р°РЅРѕРІРєР° С„РёР»СЊС‚СЂР° СЃРѕРѕР±С‰РµРЅРёСЏ
     TPassThruStartMsgFilter: function(ChannelID: longWord; FilterType: longWord;
       pMaskMsg: pointer; pPatternMsg: pointer; pFlowControlMsg: pointer;
       FilterID: pointer): integer; stdcall;
-    // удаление фильтров сообщений
+    // СѓРґР°Р»РµРЅРёРµ С„РёР»СЊС‚СЂРѕРІ СЃРѕРѕР±С‰РµРЅРёР№
     TPassThruStopMsgFilter: function(ChannelID: longWord; FilterID: longWord)
       : integer; stdcall;
-    // чтение версии прошивки, длл, api
+    // С‡С‚РµРЅРёРµ РІРµСЂСЃРёРё РїСЂРѕС€РёРІРєРё, РґР»Р», api
     TPassThruReadVersion: function(DeviceID: longWord;
       pFirmwareVersion, pDllVersion, pApiVersion: pointer): integer; stdcall;
-    // управление вводом и выводом
+    // СѓРїСЂР°РІР»РµРЅРёРµ РІРІРѕРґРѕРј Рё РІС‹РІРѕРґРѕРј
     TPassThruIoctl: function(ChannelID: longWord; IoctlID: longWord;
       pInput: pointer; pOutput: pointer): integer; stdcall;
-    // Храним дескриптор DLL
+    // РҐСЂР°РЅРёРј РґРµСЃРєСЂРёРїС‚РѕСЂ DLL
     FDLLHandle: THandle;
-    // экземпляр структуры TDIAG
+    // СЌРєР·РµРјРїР»СЏСЂ СЃС‚СЂСѓРєС‚СѓСЂС‹ TDIAG
     DiagInfo: TDIAG;
-    // экземпляр структуры для отправки сообщений
+    // СЌРєР·РµРјРїР»СЏСЂ СЃС‚СЂСѓРєС‚СѓСЂС‹ РґР»СЏ РѕС‚РїСЂР°РІРєРё СЃРѕРѕР±С‰РµРЅРёР№
     PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
-    // экземпляр структуры для приёма сообщений
+    // СЌРєР·РµРјРїР»СЏСЂ СЃС‚СЂСѓРєС‚СѓСЂС‹ РґР»СЏ РїСЂРёС‘РјР° СЃРѕРѕР±С‰РµРЅРёР№
     PASSTHRU_READ_MSG: TPASSTHRU_MSG;
+    function ClearRxBufer(): integer;
   public
     constructor Create(DLLPath: string);
     destructor Destroy; override;
-    function PassThruOpen(): Byte;
-    function PassThruClose(): Byte;
+    function PassThruOpen(): byte;
+    function PassThruClose(): byte;
     function PassThruConnect(Protocol_id: longWord; flag: longWord;
-      Baudrate: longWord): Byte;
-    function PassThruDisconnect(): Byte;
-    function PassThruWriteMsg(Data: array of Byte; Tx_Flag: longWord;
+      BaudRate: longWord): byte;
+    function PassThruDisconnect(): byte;
+    function PassThruWriteMsg(Data: array of byte; Tx_Flag: longWord;
       Timeout: longWord): integer;
     function PassThruReadMsgs(Data: pointer; Size: PLongWord;
       Timeout: longWord): integer;
     function PassThruStartMsgFilter(Filter_type: longWord;
-      MaskMsg, PatternMsg, FlowControlMsg: array of Byte;
+      MaskMsg, PatternMsg, FlowControlMsg: array of byte;
       TxFlags: longWord): integer;
     function PassThruStopMsgFilter(): integer;
     function PassThrueReadVersion(): TstringList;
-    function ClearRxBufer(): integer;
+    // function ClearRxBufer(): integer;
     function GetErrorDescriptions(error_code: integer): string;
   end;
 
-  // нужно для получения путей к длл без создания экземпляра класса
+  // РЅСѓР¶РЅРѕ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РїСѓС‚РµР№ Рє РґР»Р» Р±РµР· СЃРѕР·РґР°РЅРёСЏ СЌРєР·РµРјРїР»СЏСЂР° РєР»Р°СЃСЃР°
 function GetListDll(StringList: pointer): TstringList;
 
 implementation
 
 var
-  ERROR_MESS: TERROR_MESS = // Объявление массива ошибок
-    ('STATUS_NOERROR', // Функция выполнена успешно
+  ERROR_MESS: TERROR_MESS = // РћР±СЉСЏРІР»РµРЅРёРµ РјР°СЃСЃРёРІР° РѕС€РёР±РѕРє
+    ('STATUS_NOERROR', // Р¤СѓРЅРєС†РёСЏ РІС‹РїРѕР»РЅРµРЅР° СѓСЃРїРµС€РЅРѕ
     'ERR_SUCCESS', //
-    'ERR_NOT_SUPPORTED', // Адаптер не поддерживает запрошенные параметры.
+    'ERR_NOT_SUPPORTED', // РђРґР°РїС‚РµСЂ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ Р·Р°РїСЂРѕС€РµРЅРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹.
     'ERR_INVALID_CHANNEL_ID',
-    // Задан не существующий идентификатор канала ChannelID.
-    'ERR_NULL_PARAMETER', // Не задан указатель на буфер приёмных пакетов pMsg.
-    'ERR_INVALID_IOCTL_VALUE', // Не правильно задан значение Ioctl параметра.
-    'ERR_INVALID_FLAGS', // Задан не существующий флаг
+    // Р—Р°РґР°РЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РєР°РЅР°Р»Р° ChannelID.
+    'ERR_NULL_PARAMETER', // РќРµ Р·Р°РґР°РЅ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° Р±СѓС„РµСЂ РїСЂРёС‘РјРЅС‹С… РїР°РєРµС‚РѕРІ pMsg.
+    'ERR_INVALID_IOCTL_VALUE', // РќРµ РїСЂР°РІРёР»СЊРЅРѕ Р·Р°РґР°РЅ Р·РЅР°С‡РµРЅРёРµ Ioctl РїР°СЂР°РјРµС‚СЂР°.
+    'ERR_INVALID_FLAGS', // Р—Р°РґР°РЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С„Р»Р°Рі
     'ERR_FAILED',
-    // Определён стандартом J2534. В адаптере, для этой функции не используется.
-    'ERR_DEVICE_NOT_CONNECTED', // Нет соединения с адаптером.
-    'ERR_TIMEOUT', // За заданное время пришло меньше сообщений чем заказали.
+    // РћРїСЂРµРґРµР»С‘РЅ СЃС‚Р°РЅРґР°СЂС‚РѕРј J2534. Р’ Р°РґР°РїС‚РµСЂРµ, РґР»СЏ СЌС‚РѕР№ С„СѓРЅРєС†РёРё РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ.
+    'ERR_DEVICE_NOT_CONNECTED', // РќРµС‚ СЃРѕРµРґРёРЅРµРЅРёСЏ СЃ Р°РґР°РїС‚РµСЂРѕРј.
+    'ERR_TIMEOUT', // Р—Р° Р·Р°РґР°РЅРЅРѕРµ РІСЂРµРјСЏ РїСЂРёС€Р»Рѕ РјРµРЅСЊС€Рµ СЃРѕРѕР±С‰РµРЅРёР№ С‡РµРј Р·Р°РєР°Р·Р°Р»Рё.
     'ERR_INVALID_MSG',
-    // Не правильная структура сообщения заданная в указателе pMsg
-    'ERR_INVALID_TIME_INTERVAL', // Не правильно задан интервал выдачи сообщений
-    'ERR_EXCEEDED_LIMIT', // Превышено количество установленных фильтров.
+    // РќРµ РїСЂР°РІРёР»СЊРЅР°СЏ СЃС‚СЂСѓРєС‚СѓСЂР° СЃРѕРѕР±С‰РµРЅРёСЏ Р·Р°РґР°РЅРЅР°СЏ РІ СѓРєР°Р·Р°С‚РµР»Рµ pMsg
+    'ERR_INVALID_TIME_INTERVAL', // РќРµ РїСЂР°РІРёР»СЊРЅРѕ Р·Р°РґР°РЅ РёРЅС‚РµСЂРІР°Р» РІС‹РґР°С‡Рё СЃРѕРѕР±С‰РµРЅРёР№
+    'ERR_EXCEEDED_LIMIT', // РџСЂРµРІС‹С€РµРЅРѕ РєРѕР»РёС‡РµСЃС‚РІРѕ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹С… С„РёР»СЊС‚СЂРѕРІ.
     'ERR_INVALID_MSG_ID',
-    // Задан не существующий идентификатор адаптера DeviceID
+    // Р—Р°РґР°РЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р°РґР°РїС‚РµСЂР° DeviceID
     'ERR_DEVICE_IN_USE',
-    // Прибор уже используется программой. Возможные причины: Не была выполнена функция PassThruClose в предыдущей сессии.
+    // РџСЂРёР±РѕСЂ СѓР¶Рµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїСЂРѕРіСЂР°РјРјРѕР№. Р’РѕР·РјРѕР¶РЅС‹Рµ РїСЂРёС‡РёРЅС‹: РќРµ Р±С‹Р»Р° РІС‹РїРѕР»РЅРµРЅР° С„СѓРЅРєС†РёСЏ PassThruClose РІ РїСЂРµРґС‹РґСѓС‰РµР№ СЃРµСЃСЃРёРё.
     'ERR_INVALID_IOCTL_ID',
-    // Задан не существующий идентификатор канала IoctlID
-    'ERR_BUFFER_EMPTY', // Приёмная очередь пустая.
-    'ERR_BUFFER_FULL', // Очередь передачи переполнена.
+    // Р—Р°РґР°РЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РєР°РЅР°Р»Р° IoctlID
+    'ERR_BUFFER_EMPTY', // РџСЂРёС‘РјРЅР°СЏ РѕС‡РµСЂРµРґСЊ РїСѓСЃС‚Р°СЏ.
+    'ERR_BUFFER_FULL', // РћС‡РµСЂРµРґСЊ РїРµСЂРµРґР°С‡Рё РїРµСЂРµРїРѕР»РЅРµРЅР°.
     'ERR_BUFFER_OVERFLOW',
-    // Показывает что приёмная очередь была переполнена и сообщения были потеряны. Реальное количество принятых сообщений будет находится в NumMsgs.
-    'ERR_PIN_INVALID', // Не правильно задан вывод коммутатора.
-    'ERR_CHANNEL_IN_USE', // Канал уже используется. Определён стандартом J2534.
+    // РџРѕРєР°Р·С‹РІР°РµС‚ С‡С‚Рѕ РїСЂРёС‘РјРЅР°СЏ РѕС‡РµСЂРµРґСЊ Р±С‹Р»Р° РїРµСЂРµРїРѕР»РЅРµРЅР° Рё СЃРѕРѕР±С‰РµРЅРёСЏ Р±С‹Р»Рё РїРѕС‚РµСЂСЏРЅС‹. Р РµР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРёРЅСЏС‚С‹С… СЃРѕРѕР±С‰РµРЅРёР№ Р±СѓРґРµС‚ РЅР°С…РѕРґРёС‚СЃСЏ РІ NumMsgs.
+    'ERR_PIN_INVALID', // РќРµ РїСЂР°РІРёР»СЊРЅРѕ Р·Р°РґР°РЅ РІС‹РІРѕРґ РєРѕРјРјСѓС‚Р°С‚РѕСЂР°.
+    'ERR_CHANNEL_IN_USE', // РљР°РЅР°Р» СѓР¶Рµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ. РћРїСЂРµРґРµР»С‘РЅ СЃС‚Р°РЅРґР°СЂС‚РѕРј J2534.
     'ERR_MSG_PROTOCOL_ID',
-    // Протокол заданный в параметрах передаваемого сообщения не совпадает с протоколом заданным в ChannelID
+    // РџСЂРѕС‚РѕРєРѕР» Р·Р°РґР°РЅРЅС‹Р№ РІ РїР°СЂР°РјРµС‚СЂР°С… РїРµСЂРµРґР°РІР°РµРјРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ РЅРµ СЃРѕРІРїР°РґР°РµС‚ СЃ РїСЂРѕС‚РѕРєРѕР»РѕРј Р·Р°РґР°РЅРЅС‹Рј РІ ChannelID
     'ERR_INVALID_FILTER_ID',
-    // Задан не существующий идентификатор фильтра FilterID
+    // Р—Р°РґР°РЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ С„РёР»СЊС‚СЂР° FilterID
     'ERR_NO_FLOW_CONTROL',
-    // Для протокола ISO15765 не установлен фильтр для Flow Control.
+    // Р”Р»СЏ РїСЂРѕС‚РѕРєРѕР»Р° ISO15765 РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ С„РёР»СЊС‚СЂ РґР»СЏ Flow Control.
     'ERR_NOT_UNIQUE',
-    // CAN ID в pPatternMsg или pFlowControlMsg соответствует какому либо ID в уже существующем FLOW_CONTROL_FILTER
-    'ERR_INVALID_BAUDRATE', // Задана не правильная скорость обмена
+    // CAN ID РІ pPatternMsg РёР»Рё pFlowControlMsg СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ РєР°РєРѕРјСѓ Р»РёР±Рѕ ID РІ СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРј FLOW_CONTROL_FILTER
+    'ERR_INVALID_BAUDRATE', // Р—Р°РґР°РЅР° РЅРµ РїСЂР°РІРёР»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ РѕР±РјРµРЅР°
     'ERR_INVALID_DEVICE_ID'
-    // Задан не существующий идентификатор адаптера DeviceID
+    // Р—Р°РґР°РЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ Р°РґР°РїС‚РµСЂР° DeviceID
     );
 
-  // получаем список длл
+  // РїРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє РґР»Р»
 function GetListDll(StringList: pointer): TstringList;
 var
   P: ^TstringList;
@@ -175,11 +197,11 @@ begin
   for i := 0 to s.Count - 1 do
   begin
 
-    // проверка открытия секции
+    // РїСЂРѕРІРµСЂРєР° РѕС‚РєСЂС‹С‚РёСЏ СЃРµРєС†РёРё
     if reg.OpenKeyReadOnly(s[i]) then
     begin
 
-      // проверка существования dll
+      // РїСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ dll
       dll_ := reg.ReadString('FunctionLibrary');
       if dll_ <> '' then
       begin
@@ -199,131 +221,130 @@ end;
 
 constructor TJ2534_v2.Create(DLLPath: string);
 begin
-  // обнуляем экземпляры структур
+  // РѕР±РЅСѓР»СЏРµРј СЌРєР·РµРјРїР»СЏСЂС‹ СЃС‚СЂСѓРєС‚СѓСЂ
   FillChar(DiagInfo, SizeOf(DiagInfo), 0);
   FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
   FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
   FDLLHandle := LoadLibrary(PChar(DLLPath));
 
   if FDLLHandle = 0 then
-    raise Exception.Create('Не удалось загрузить DLL: ' + DLLPath);
+    raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ DLL: ' + DLLPath);
 
-  // Проверяем успешность поиска каждой функции
+  // РџСЂРѕРІРµСЂСЏРµРј СѓСЃРїРµС€РЅРѕСЃС‚СЊ РїРѕРёСЃРєР° РєР°Р¶РґРѕР№ С„СѓРЅРєС†РёРё
   TPassThruOpen := GetProcAddress(FDLLHandle, 'PassThruOpen');
   if addr(TPassThruOpen) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruOpen в DLL');
+    raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruOpen РІ DLL');
 
   TPassThruClose := GetProcAddress(FDLLHandle, 'PassThruClose');
   if addr(TPassThruClose) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruClose в DLL');
+    raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruClose РІ DLL');
 
   TPassThruConnect := GetProcAddress(FDLLHandle, 'PassThruConnect');
   if addr(TPassThruConnect) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruConnect в DLL');
+    raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruConnect РІ DLL');
 
   TPassThruDisconnect := GetProcAddress(FDLLHandle, 'PassThruDisconnect');
   if addr(TPassThruDisconnect) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruDisconnect в DLL');
+    raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruDisconnect РІ DLL');
 
   TPassThruReadMsgs := GetProcAddress(FDLLHandle, 'PassThruReadMsgs');
   if addr(TPassThruReadMsgs) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruReadMsgs в DLL');
+    raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruReadMsgs РІ DLL');
 
   TPassThruWriteMsgs := GetProcAddress(FDLLHandle, 'PassThruWriteMsgs');
   if addr(TPassThruWriteMsgs) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruWriteMsgs в DLL');
+    raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruWriteMsgs РІ DLL');
 
   TPassThruStartMsgFilter := GetProcAddress(FDLLHandle,
     'PassThruStartMsgFilter');
   if addr(TPassThruStartMsgFilter) = nil then
     raise Exception.Create
-      ('Не удалось найти функцию PassThruStartMsgFilter в DLL');
+      ('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruStartMsgFilter РІ DLL');
 
   TPassThruStopMsgFilter := GetProcAddress(FDLLHandle, 'PassThruStopMsgFilter');
   if addr(TPassThruStopMsgFilter) = nil then
     raise Exception.Create
-      ('Не удалось найти функцию PassThruStopMsgFilter в DLL');
+      ('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruStopMsgFilter РІ DLL');
 
   TPassThruReadVersion := GetProcAddress(FDLLHandle, 'PassThruReadVersion');
   if addr(TPassThruReadVersion) = nil then
     raise Exception.Create
-      ('Не удалось найти функцию PassThruReadVersion в DLL');
+      ('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruReadVersion РІ DLL');
 
   TPassThruIoctl := GetProcAddress(FDLLHandle, 'PassThruIoctl');
   if addr(TPassThruReadVersion) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruIoctl в DLL');
+    raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё С„СѓРЅРєС†РёСЋ PassThruIoctl РІ DLL');
 end;
 
 destructor TJ2534_v2.Destroy;
 begin
-  // Освобождаем DLL, если она была загружена
+  // РћСЃРІРѕР±РѕР¶РґР°РµРј DLL, РµСЃР»Рё РѕРЅР° Р±С‹Р»Р° Р·Р°РіСЂСѓР¶РµРЅР°
   if FDLLHandle <> 0 then
     FreeLibrary(FDLLHandle);
-
   inherited Destroy;
 end;
 
-function TJ2534_v2.PassThruOpen(): Byte;
+function TJ2534_v2.PassThruOpen(): byte;
 begin
   try
-    // Вызываем метод PassThruOpen, передавая указатель
+    // Р’С‹Р·С‹РІР°РµРј РјРµС‚РѕРґ PassThruOpen, РїРµСЂРµРґР°РІР°СЏ СѓРєР°Р·Р°С‚РµР»СЊ
     result := TPassThruOpen(nil, @DiagInfo.Device_ID);
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Не удалось открыть шлюз адаптера');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С€Р»СЋР· Р°РґР°РїС‚РµСЂР°');
     end;
   end;
 end;
 
-function TJ2534_v2.PassThruClose(): Byte;
+function TJ2534_v2.PassThruClose(): byte;
 begin
   try
-    // Вызываем метод PassThruClose
+    // Р’С‹Р·С‹РІР°РµРј РјРµС‚РѕРґ PassThruClose
     result := TPassThruClose(DiagInfo.Device_ID);
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Не удалось закрыть шлюз адаптера');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РєСЂС‹С‚СЊ С€Р»СЋР· Р°РґР°РїС‚РµСЂР°');
     end;
   end;
 end;
 
 function TJ2534_v2.PassThruConnect(Protocol_id: Cardinal; flag: Cardinal;
-  Baudrate: Cardinal): Byte;
+  BaudRate: Cardinal): byte;
 begin
   try
     DiagInfo.ProtocilID := Protocol_id;
     DiagInfo.Flags := flag;
-    DiagInfo.Baudrate := Baudrate;
-    // Вызываем метод PassThruConnect
+    DiagInfo.BaudRate := BaudRate;
+    // Р’С‹Р·С‹РІР°РµРј РјРµС‚РѕРґ PassThruConnect
     result := TPassThruConnect(DiagInfo.Device_ID, DiagInfo.ProtocilID,
-      DiagInfo.Flags, DiagInfo.Baudrate, @DiagInfo.ChannelID);
+      DiagInfo.Flags, DiagInfo.BaudRate, @DiagInfo.ChannelID);
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Не удалось установить соединение');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РќРµ СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЃРѕРµРґРёРЅРµРЅРёРµ');
     end;
   end;
 end;
 
-function TJ2534_v2.PassThruDisconnect(): Byte;
+function TJ2534_v2.PassThruDisconnect(): byte;
 begin
   try
     result := self.TPassThruDisconnect(self.DiagInfo.ChannelID);
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruDisconnect');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РћС€РёР±РєР° PassThruDisconnect');
     end;
   end;
 end;
 
-function TJ2534_v2.PassThruWriteMsg(Data: array of Byte; Tx_Flag: Cardinal;
+function TJ2534_v2.PassThruWriteMsg(Data: array of byte; Tx_Flag: Cardinal;
   Timeout: Cardinal): integer;
 var
   num_msg: integer;
@@ -340,8 +361,8 @@ begin
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruWriteMsgs');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РћС€РёР±РєР° PassThruWriteMsgs');
     end;
   end;
 end;
@@ -363,16 +384,16 @@ begin
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruReadMsgs');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РћС€РёР±РєР° PassThruReadMsgs');
     end;
   end;
 end;
 
 function TJ2534_v2.PassThruStartMsgFilter(Filter_type: longWord;
-  MaskMsg, PatternMsg, FlowControlMsg: array of Byte;
+  MaskMsg, PatternMsg, FlowControlMsg: array of byte;
   TxFlags: longWord): integer;
-{ установка фильтра приёма сообщений }
+{ СѓСЃС‚Р°РЅРѕРІРєР° С„РёР»СЊС‚СЂР° РїСЂРёС‘РјР° СЃРѕРѕР±С‰РµРЅРёР№ }
 var
   mask, patter, FC: TPASSTHRU_MSG;
   i: integer;
@@ -386,6 +407,9 @@ begin
   mask.ProtocolID := DiagInfo.ProtocilID;
   patter.ProtocolID := DiagInfo.ProtocilID;
   FC.ProtocolID := DiagInfo.ProtocilID;
+  mask.DataSize:=4;
+  patter.DataSize:=4;
+  FC.DataSize:=4;
   for i := 0 to 3 do
   begin
     mask.Data[i] := MaskMsg[i];
@@ -393,19 +417,21 @@ begin
     FC.Data[i] := FlowControlMsg[i];
   end;
   try
+    //ClearRxBufer;
     result := self.TPassThruStartMsgFilter(self.DiagInfo.ChannelID, Filter_type,
       @mask, @patter, @FC, @DiagInfo.FilterID);
+    ClearRxBufer;
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruReadMsgs');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РћС€РёР±РєР° PassThruReadMsgs');
     end;
   end;
 end;
 
 function TJ2534_v2.PassThruStopMsgFilter(): integer;
-{ удаление фильтра приёма сообщений }
+{ СѓРґР°Р»РµРЅРёРµ С„РёР»СЊС‚СЂР° РїСЂРёС‘РјР° СЃРѕРѕР±С‰РµРЅРёР№ }
 begin
   try
     result := self.TPassThruStopMsgFilter(self.DiagInfo.ChannelID,
@@ -413,16 +439,16 @@ begin
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruStopMsgFilter');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РћС€РёР±РєР° PassThruStopMsgFilter');
     end;
   end;
 end;
 
-{ чтение версии }
+{ С‡С‚РµРЅРёРµ РІРµСЂСЃРёРё }
 function TJ2534_v2.PassThrueReadVersion(): TstringList;
 var
-  firm_version, dll_version, ApiVersion: array [0 .. 80] of Byte;
+  firm_version, dll_version, ApiVersion: array [0 .. 80] of byte;
   err: integer;
   F, D, A: string;
 begin
@@ -451,8 +477,8 @@ begin
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruReadVersion');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РћС€РёР±РєР° PassThruReadVersion');
     end;
   end;
 end;
@@ -464,8 +490,8 @@ begin
   except
     on E: Exception do
     begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка ClearRx');
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё
+      raise Exception.Create('РћС€РёР±РєР° ClearRx');
     end;
   end;
 end;
