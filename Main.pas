@@ -16,13 +16,15 @@ type
     TabSheet2: TTabSheet;
     ComboBoxDll: TComboBox;
     ComboBoxDiag: TComboBox;
-    CheckListBox1: TCheckListBox;
+    CheckListBoxDiag: TCheckListBox;
     Memo1: TMemo;
     ButtonConnect: TButton;
     Button1: TButton;
+    ButtonSetDiag: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ButtonConnectClick(Sender: TObject);
+    procedure ButtonSetDiagClick(Sender: TObject);
   private
     { Private declarations }
     StringListDll: TstringList;
@@ -30,6 +32,8 @@ type
     Diag: TDiag;
     procedure create_class_j2534;
     procedure check_adapter_j2534;
+    procedure create_diag_class;
+    procedure get_list_param;
   public
     { Public declarations }
   end;
@@ -68,43 +72,80 @@ begin
   if J2534 = nil then
     if StringListDll.Count > 0 then
       J2534 := TJ2534_v2.Create(StringListDll[ComboBoxDll.ItemIndex]);
+  create_diag_class;
 end;
 
 procedure TMainForm.ButtonConnectClick(Sender: TObject);
 begin
-create_class_j2534;
-check_adapter_j2534;
+  create_class_j2534;
+  check_adapter_j2534;
+end;
+
+procedure TMainForm.ButtonSetDiagClick(Sender: TObject);
+begin
+get_list_param;
 end;
 
 procedure TMainForm.check_adapter_j2534;
 var
-err_number:integer;
-error_description:string;
+  err_number: integer;
+  error_description: string;
 begin
-memo1.Lines.Clear;
-  if J2534 <> nil then begin
-    err_number:=J2534.PassThruOpen;
-    error_description:=J2534.GetErrorDescriptions(err_number);
-    memo1.Lines.Add('Open adapter = '+error_description);
-    memo1.Lines.AddStrings(J2534.PassThrueReadVersion);
+  Memo1.Lines.Clear;
+  if J2534 <> nil then
+  begin
+    err_number := J2534.PassThruOpen;
+    error_description := J2534.GetErrorDescriptions(err_number);
+    Memo1.Lines.Add('Open adapter = ' + error_description);
+    Memo1.Lines.AddStrings(J2534.PassThrueReadVersion);
 
-    err_number:=J2534.PassThruConnect;
-    error_description:=J2534.GetErrorDescriptions(err_number);
-    memo1.Lines.Add('Connect = '+error_description);
+    err_number := J2534.PassThruConnect;
+    error_description := J2534.GetErrorDescriptions(err_number);
+    Memo1.Lines.Add('Connect = ' + error_description);
 
-    err_number:=J2534.PassThruStartMsgFilter();
-    error_description:=J2534.GetErrorDescriptions(err_number);
-    memo1.Lines.Add('Set Msg Filter = '+error_description);
+    err_number := J2534.PassThruStartMsgFilter();
+    error_description := J2534.GetErrorDescriptions(err_number);
+    Memo1.Lines.Add('Set Msg Filter = ' + error_description);
 
-    err_number:=J2534.PassThruDisconnect;
-    error_description:=J2534.GetErrorDescriptions(err_number);
-    memo1.Lines.Add('Disconnect = '+error_description);
+    err_number := J2534.PassThruDisconnect;
+    error_description := J2534.GetErrorDescriptions(err_number);
+    Memo1.Lines.Add('Disconnect = ' + error_description);
 
-    err_number:=J2534.PassThruClose;
-    error_description:=J2534.GetErrorDescriptions(err_number);
-    memo1.Lines.Add('Close adapter = '+error_description);
+    err_number := J2534.PassThruClose;
+    error_description := J2534.GetErrorDescriptions(err_number);
+    Memo1.Lines.Add('Close adapter = ' + error_description);
   end;
 
 end;
 
+procedure TMainForm.create_diag_class;
+var
+  list_maker: TstringList;
+begin
+  if J2534 <> nil then
+  begin
+    Diag := TDiag.Create(False, J2534);
+    list_maker := Diag.GetListMaker;
+    if list_maker.Count > 0 then
+    begin
+      ComboBoxDiag.Items.AddStrings(list_maker);
+      ComboBoxDiag.ItemIndex := 0;
+    end;
+    list_maker.Free;
+  end;
+
+end;
+procedure Tmainform.get_list_param;
+var
+list_param:tstringlist;
+begin
+    if diag <> nil then
+       if comboboxdiag.ItemIndex >=0 then begin
+        diag.CheckListData(comboboxdiag.ItemIndex, @memo1);
+        list_param:=diag.GetListParam(comboboxdiag.ItemIndex);
+        CheckListBoxDiag.Items.AddStrings(list_param);
+        list_param.Free;
+       end;
+
+end;
 end.

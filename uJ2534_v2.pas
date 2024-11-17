@@ -379,6 +379,7 @@ function TJ2534_v2.PassThruReadMsgs(Data: pointer; Size: PLongWord;
   Timeout: Cardinal): integer;
 var
   NumMsg: integer;
+  count_read:integer;
 begin
   try
     Size^ := 0;
@@ -387,13 +388,22 @@ begin
     PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
     result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID,
       @PASSTHRU_READ_MSG, @NumMsg, Timeout);
+    count_read:=5;
+    while (PASSTHRU_READ_MSG.RxStatus <> 0) and (count_read > 0) do
+    begin
+      result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID,
+        @PASSTHRU_READ_MSG, @NumMsg, Timeout);
+      count_read:=count_read-1;
+    end;
+    if result <> 0 then raise Exception.Create('Error Read');
+
     Size^ := PASSTHRU_READ_MSG.DataSize;
     move(PASSTHRU_READ_MSG.Data[0], Data^, Size^);
   except
     on E: Exception do
     begin
       // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruReadMsgs');
+      raise Exception.Create('Ошибка PassThruReadMsgs '+self.GetErrorDescriptions(result));
     end;
   end;
 end;

@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, uJ2534_v2, IOUtils, Xml.XMLDoc, Xml.xmldom,
-  Xml.XMLIntf, dialogs;
+  Xml.XMLIntf, dialogs, Vcl.StdCtrls;
 
 type
   TParam = record
@@ -45,7 +45,7 @@ type
     procedure Execute; override;
   public
     Diag_Struct: array of TDiag_Struct;
-    procedure CheckListData(number_system: integer);
+    procedure CheckListData(number_system: integer; memo:pointer);
     constructor Create(CreateSuspended: boolean; ex_j2534: TJ2534_v2);
     destructor Destroy; override;
     function StrToFloatD(value: string): real;
@@ -210,7 +210,7 @@ begin
   XMLDocument.Active := False;
 end;
 
-procedure TDiag.CheckListData(number_system: integer);
+procedure TDiag.CheckListData(number_system: integer; memo:pointer);
   function arr_hex_to_str(arr: array of byte; size_pack: integer): string;
   var
     i: integer;
@@ -224,7 +224,9 @@ var
   err: integer;
   size_pack: cardinal;
   data: array [0 .. 1024] of byte;
+  memo_lines:^Tmemo;
 begin
+  memo_lines:=memo;
   try
     err := J2534_ex.PassThruOpen;
     err := J2534_ex.PassThruConnect(uJ2534_v2.TProtocolID.ISO15765,
@@ -242,8 +244,9 @@ begin
           .request_id, $40, 500);
 
         if err = 0 then
-          err := J2534_ex.PassThruReadMsgs(@data[0], @size_pack, 1000);
-        showmessage(arr_hex_to_str(data, size_pack));
+          err := J2534_ex.PassThruReadMsgs(@data[0], @size_pack, 200);
+        //showmessage(arr_hex_to_str(data, size_pack));
+        memo_lines^.Lines.Add(arr_hex_to_str(data, size_pack));
         if err = 0 then
         begin
           Diag_Struct[number_system].Systems[i].flag_usage := True;
@@ -348,6 +351,7 @@ function TDiag.Stop;
 begin
   self.RunThread := False;
   self.WaitFor;
+  result:=True;
 end;
 
 end.
