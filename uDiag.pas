@@ -39,6 +39,7 @@ type
     FResult: boolean;
     J2534_ex: TJ2534_v2; // экзепляр класса диагностики
     RunThread: boolean;
+    index_param_diag:integer;
     procedure LoadXmlData;
 
   protected
@@ -331,6 +332,7 @@ function TDiag.GetListParam(number_maker: integer): TStringList;
 var
   i: integer;
 begin
+  index_param_diag:=number_maker;
   Result := TStringList.Create;
   if number_maker <= length(Diag_Struct) - 1 then
   begin
