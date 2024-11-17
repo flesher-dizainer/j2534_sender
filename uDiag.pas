@@ -211,12 +211,12 @@ begin
 end;
 
 procedure TDiag.CheckListData(number_system: integer);
-  function arr_hex_to_str(arr: array of byte; size_pack:integer): string;
+  function arr_hex_to_str(arr: array of byte; size_pack: integer): string;
   var
-  i:integer;
+    i: integer;
   begin
-  for I := 0 to size_pack - 1 do
-     result:=result + IntToHex(arr[i],2) + ' ';
+    for i := 0 to size_pack - 1 do
+      Result := Result + IntToHex(arr[i], 2) + ' ';
   end;
 
 var
@@ -347,6 +347,7 @@ end;
 function TDiag.Stop;
 begin
   self.RunThread := False;
+  self.WaitFor;
 end;
 
 end.

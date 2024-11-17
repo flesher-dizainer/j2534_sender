@@ -24,7 +24,7 @@ type
 type
   TFilterMSG = record
   const
-    MaskMsg: array [0 .. 3] of byte = ($0, $0, $07, $e8);
+    MaskMsg: array [0 .. 3] of byte = ($0, $0, $07, $E8);
     PatternMsg: array [0 .. 3] of byte = (0, 0, $07, $E8);
     FlowControlMsg: array [0 .. 3] of byte = (0, 0, $07, $E0);
   end;
@@ -39,7 +39,7 @@ type
 
   { -----данные протокола, ид канала и т.п }
 type
-  TDIAG = record
+  TDIAG_data = record
     Device_ID: longWord; // идент устройства
     ProtocilID: longWord; // идент протокола связи
     Flags: longWord; // флаги соединения
@@ -98,8 +98,8 @@ type
       pInput: pointer; pOutput: pointer): integer; stdcall;
     // Храним дескриптор DLL
     FDLLHandle: THandle;
-    // экземпляр структуры TDIAG
-    DiagInfo: TDIAG;
+    // экземпляр структуры TDIAG_data
+    DiagInfo: TDIAG_data;
     // экземпляр структуры для отправки сообщений
     PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
     // экземпляр структуры для приёма сообщений
@@ -111,15 +111,17 @@ type
     function PassThruOpen(): byte;
     function PassThruClose(): byte;
     function PassThruConnect(Protocol_id: longWord; flag: longWord;
-      BaudRate: longWord): byte;
+      BaudRate: longWord): byte; overload;
+    function PassThruConnect(): byte; overload;
     function PassThruDisconnect(): byte;
     function PassThruWriteMsg(Data: array of byte; Tx_Flag: longWord;
       Timeout: longWord): integer;
     function PassThruReadMsgs(Data: pointer; Size: PLongWord;
       Timeout: longWord): integer;
     function PassThruStartMsgFilter(Filter_type: longWord;
-      MaskMsg, PatternMsg, FlowControlMsg: array of byte;
-      TxFlags: longWord): integer;
+      MaskMsg, PatternMsg, FlowControlMsg: array of byte; TxFlags: longWord)
+      : integer; overload;
+    function PassThruStartMsgFilter(): integer; overload;
     function PassThruStopMsgFilter(): integer;
     function PassThrueReadVersion(): TstringList;
     // function ClearRxBufer(): integer;
@@ -331,6 +333,12 @@ begin
   end;
 end;
 
+function TJ2534_v2.PassThruConnect(): byte;
+begin
+  result := PassThruConnect(TProtocolID.ISO15765,
+    TFLAGS.CONNECT_FLAGS_CAN_11BIT_ID, TBaudRate.BaudRate);
+end;
+
 function TJ2534_v2.PassThruDisconnect(): byte;
 begin
   try
@@ -407,9 +415,9 @@ begin
   mask.ProtocolID := DiagInfo.ProtocilID;
   patter.ProtocolID := DiagInfo.ProtocilID;
   FC.ProtocolID := DiagInfo.ProtocilID;
-  mask.DataSize:=4;
-  patter.DataSize:=4;
-  FC.DataSize:=4;
+  mask.DataSize := 4;
+  patter.DataSize := 4;
+  FC.DataSize := 4;
   for i := 0 to 3 do
   begin
     mask.Data[i] := MaskMsg[i];
@@ -417,7 +425,7 @@ begin
     FC.Data[i] := FlowControlMsg[i];
   end;
   try
-    //ClearRxBufer;
+    // ClearRxBufer;
     result := self.TPassThruStartMsgFilter(self.DiagInfo.ChannelID, Filter_type,
       @mask, @patter, @FC, @DiagInfo.FilterID);
     ClearRxBufer;
@@ -425,9 +433,16 @@ begin
     on E: Exception do
     begin
       // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruReadMsgs');
+      raise Exception.Create('Ошибка PassThruStartMsgFilter');
     end;
   end;
+end;
+
+function TJ2534_v2.PassThruStartMsgFilter(): integer;
+begin
+  result := PassThruStartMsgFilter(TFLAGS.FILTER_TYPE_FLOW_CONTROL_FILTER,
+    TFilterMSG.MaskMsg, TFilterMSG.PatternMsg, TFilterMSG.FlowControlMsg,
+    TFLAGS.TRANSMITT_FLAGS_ISO15765_FRAME_PAD);
 end;
 
 function TJ2534_v2.PassThruStopMsgFilter(): integer;
