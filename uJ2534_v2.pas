@@ -395,7 +395,6 @@ begin
         @PASSTHRU_READ_MSG, @NumMsg, Timeout);
       count_read:=count_read-1;
     end;
-    if result <> 0 then raise Exception.Create('Error Read');
 
     Size^ := PASSTHRU_READ_MSG.DataSize;
     move(PASSTHRU_READ_MSG.Data[0], Data^, Size^);

@@ -21,6 +21,8 @@ type
     ButtonConnect: TButton;
     Button1: TButton;
     ButtonSetDiag: TButton;
+    ButtonStartDiag: TButton;
+    ButtonStopDiag: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ButtonConnectClick(Sender: TObject);
@@ -83,7 +85,7 @@ end;
 
 procedure TMainForm.ButtonSetDiagClick(Sender: TObject);
 begin
-get_list_param;
+  get_list_param;
 end;
 
 procedure TMainForm.check_adapter_j2534;
@@ -128,6 +130,7 @@ begin
     list_maker := Diag.GetListMaker;
     if list_maker.Count > 0 then
     begin
+      ComboBoxDiag.Items.Clear;
       ComboBoxDiag.Items.AddStrings(list_maker);
       ComboBoxDiag.ItemIndex := 0;
     end;
@@ -135,17 +138,28 @@ begin
   end;
 
 end;
-procedure Tmainform.get_list_param;
+
+procedure TMainForm.get_list_param;
 var
-list_param:tstringlist;
+  list_param: TstringList;
+  i: integer;
 begin
-    if diag <> nil then
-       if comboboxdiag.ItemIndex >=0 then begin
-        diag.CheckListData(comboboxdiag.ItemIndex, @memo1);
-        list_param:=diag.GetListParam(comboboxdiag.ItemIndex);
-        CheckListBoxDiag.Items.AddStrings(list_param);
-        list_param.Free;
-       end;
+  if Diag <> nil then
+    if ComboBoxDiag.ItemIndex >= 0 then
+    begin
+      CheckListBoxDiag.Items.Clear;
+      Diag.CheckListData(ComboBoxDiag.ItemIndex, @Memo1);
+      list_param := Diag.GetListParam(ComboBoxDiag.ItemIndex);
+      CheckListBoxDiag.Items.AddStrings(list_param);
+      for i := 0 to length(Diag.Diag_Struct[ComboBoxDiag.ItemIndex]
+        .Systems) - 1 do
+        if Diag.Diag_Struct[ComboBoxDiag.ItemIndex].Systems[i].flag_usage = False
+        then
+          CheckListBoxDiag.ItemEnabled[i] := False;
+
+      list_param.Free;
+    end;
 
 end;
+
 end.

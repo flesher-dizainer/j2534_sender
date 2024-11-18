@@ -3,7 +3,8 @@
 interface
 
 uses
-  Windows, SysUtils, Classes, uJ2534_v2, IOUtils, Xml.XMLDoc, Xml.xmldom,
+  Windows, SysUtils, Classes, uJ2534_v2, StrUtils, IOUtils, Xml.XMLDoc,
+  Xml.xmldom,
   Xml.XMLIntf, dialogs, Vcl.StdCtrls;
 
 type
@@ -39,14 +40,14 @@ type
     FResult: boolean;
     J2534_ex: TJ2534_v2; // экзепляр класса диагностики
     RunThread: boolean;
-    index_param_diag:integer;
+    index_param_diag: integer;
     procedure LoadXmlData;
 
   protected
     procedure Execute; override;
   public
     Diag_Struct: array of TDiag_Struct;
-    procedure CheckListData(number_system: integer; memo:pointer);
+    procedure CheckListData(number_system: integer; memo: pointer);
     constructor Create(CreateSuspended: boolean; ex_j2534: TJ2534_v2);
     destructor Destroy; override;
     function StrToFloatD(value: string): real;
@@ -211,60 +212,56 @@ begin
   XMLDocument.Active := False;
 end;
 
-procedure TDiag.CheckListData(number_system: integer; memo:pointer);
-  function arr_hex_to_str(arr: array of byte; size_pack: integer): string;
-  var
-    i: integer;
-  begin
-    for i := 0 to size_pack - 1 do
-      Result := Result + IntToHex(arr[i], 2) + ' ';
-  end;
-
+function arr_hex_to_str(arr: array of byte; size_pack: integer): string;
 var
-  i, t: integer;
-  err: integer;
-  size_pack: cardinal;
-  data: array [0 .. 1024] of byte;
-  memo_lines:^Tmemo;
+  i: integer;
 begin
-  memo_lines:=memo;
-  try
-    err := J2534_ex.PassThruOpen;
-    err := J2534_ex.PassThruConnect(uJ2534_v2.TProtocolID.ISO15765,
-      uJ2534_v2.TFLAGS.CONNECT_FLAGS_CAN_11BIT_ID,
-      uJ2534_v2.TBaudRate.BaudRate);
-    err := J2534_ex.PassThruStartMsgFilter
-      (uJ2534_v2.TFLAGS.FILTER_TYPE_FLOW_CONTROL_FILTER,
-      uJ2534_v2.TFilterMSG.MaskMsg, uJ2534_v2.TFilterMSG.PatternMsg,
-      uJ2534_v2.TFilterMSG.FlowControlMsg,
-      uJ2534_v2.TFLAGS.TRANSMITT_FLAGS_ISO15765_FRAME_PAD);
-    if length(Diag_Struct) > 0 then
-      for i := 0 to length(Diag_Struct[number_system].Systems) - 1 do
+  for i := 0 to size_pack - 1 do
+    Result := Result + IntToHex(arr[i], 2) + ' ';
+end;
+
+procedure TDiag.CheckListData(number_system: integer; memo: pointer);
+var
+  i, err: integer;
+  system_t: TSystems;
+  data: array [0 .. 4127] of byte;
+  in_size: cardinal;
+  response_str: string;
+  req: string;
+  mem:^Tmemo;
+begin
+mem:=memo;
+  if (length(Diag_Struct) >= number_system) and (J2534_ex <> nil) then
+  begin
+    if length(Diag_Struct[number_system].Systems) > 0 then
+    begin
+      J2534_ex.PassThruOpen;
+      J2534_ex.PassThruConnect;
+      J2534_ex.PassThruStartMsgFilter;
+      i := 0;
+      for system_t in Diag_Struct[number_system].Systems do
       begin
-        err := J2534_ex.PassThruWriteMsg(Diag_Struct[number_system].Systems[i]
-          .request_id, $40, 500);
-
+        err := J2534_ex.PassThruWriteMsg(system_t.request_id, $40, 500);
         if err = 0 then
-          err := J2534_ex.PassThruReadMsgs(@data[0], @size_pack, 200);
-        //showmessage(arr_hex_to_str(data, size_pack));
-        memo_lines^.Lines.Add(arr_hex_to_str(data, size_pack));
-        if err = 0 then
+          err := J2534_ex.PassThruReadMsgs(@data[0], @in_size, 200);
+        if (err = 0) and (in_size > 0) then
         begin
-          Diag_Struct[number_system].Systems[i].flag_usage := True;
-          for t := 0 to length(Diag_Struct[number_system].Systems[i]
-            .response_id) - 1 do
-            if Diag_Struct[number_system].Systems[i].response_id[t] <> data[t]
-            then
-              Diag_Struct[number_system].Systems[i].flag_usage := False;
+          response_str := arr_hex_to_str(data, in_size);
+          mem^.Lines.Add(response_str);
+          req := arr_hex_to_str(system_t.response_id,
+            length(system_t.response_id));
+          if pos(req, response_str) > 0 then
+          begin
+             Diag_Struct[number_system].Systems[i].flag_usage:=True;
+          end;
+
         end;
+        inc(i, 1);
       end;
-
-    // Diag_Struct
-
-  finally
-    J2534_ex.PassThruStopMsgFilter;
     J2534_ex.PassThruDisconnect;
     J2534_ex.PassThruClose;
+    end;
+
   end;
 
 end;
@@ -332,7 +329,7 @@ function TDiag.GetListParam(number_maker: integer): TStringList;
 var
   i: integer;
 begin
-  index_param_diag:=number_maker;
+  index_param_diag := number_maker;
   Result := TStringList.Create;
   if number_maker <= length(Diag_Struct) - 1 then
   begin
@@ -347,13 +344,14 @@ end;
 function TDiag.Start: boolean;
 begin
   self.RunThread := True;
+  Result := RunThread;
 end;
 
 function TDiag.Stop;
 begin
   self.RunThread := False;
   self.WaitFor;
-  result:=True;
+  Result := True;
 end;
 
 end.
