@@ -101,9 +101,9 @@ type
     // экземпляр структуры TDIAG_data
     DiagInfo: TDIAG_data;
     // экземпляр структуры для отправки сообщений
-    PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
+    //PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
     // экземпляр структуры для приёма сообщений
-    PASSTHRU_READ_MSG: TPASSTHRU_MSG;
+    //PASSTHRU_READ_MSG: TPASSTHRU_MSG;
     function ClearRxBufer(): integer;
   public
     constructor Create(DLLPath: string);
@@ -225,8 +225,8 @@ constructor TJ2534_v2.Create(DLLPath: string);
 begin
   // обнуляем экземпляры структур
   FillChar(DiagInfo, SizeOf(DiagInfo), 0);
-  FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
-  FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
+  //FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
+  //FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
   FDLLHandle := LoadLibrary(PChar(DLLPath));
 
   if FDLLHandle = 0 then
@@ -356,6 +356,7 @@ function TJ2534_v2.PassThruWriteMsg(Data: array of byte; Tx_Flag: Cardinal;
   Timeout: Cardinal): integer;
 var
   num_msg: integer;
+  PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
 begin
   try
     FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
@@ -380,6 +381,7 @@ function TJ2534_v2.PassThruReadMsgs(Data: pointer; Size: PLongWord;
 var
   NumMsg: integer;
   count_read:integer;
+  PASSTHRU_READ_MSG: TPASSTHRU_MSG;
 begin
   try
     Size^ := 0;
@@ -391,6 +393,9 @@ begin
     count_read:=5;
     while (PASSTHRU_READ_MSG.RxStatus <> 0) and (count_read > 0) do
     begin
+      NumMsg := 1;
+      FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
+      PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
       result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID,
         @PASSTHRU_READ_MSG, @NumMsg, Timeout);
       count_read:=count_read-1;
