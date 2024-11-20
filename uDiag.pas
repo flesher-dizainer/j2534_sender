@@ -216,6 +216,7 @@ function arr_hex_to_str(arr: array of byte; size_pack: integer): string;
 var
   i: integer;
 begin
+  Result := '';
   for i := 0 to size_pack - 1 do
     Result := Result + IntToHex(arr[i], 2) + ' ';
 end;
@@ -228,9 +229,9 @@ var
   in_size: cardinal;
   response_str: string;
   req: string;
-  mem:^Tmemo;
+  mem: ^Tmemo;
 begin
-mem:=memo;
+  mem := memo;
   if (length(Diag_Struct) >= number_system) and (J2534_ex <> nil) then
   begin
     if length(Diag_Struct[number_system].Systems) > 0 then
@@ -241,25 +242,26 @@ mem:=memo;
       i := 0;
       for system_t in Diag_Struct[number_system].Systems do
       begin
-        err := J2534_ex.PassThruWriteMsg(system_t.request_id, $40, 500);
+        err := J2534_ex.PassThruWriteMsg(system_t.request_id, $40, 0);
         if err = 0 then
-          err := J2534_ex.PassThruReadMsgs(@data[0], @in_size, 200);
+          err := J2534_ex.PassThruReadMsgs(@data[0], @in_size, 500);
         if (err = 0) and (in_size > 0) then
         begin
           response_str := arr_hex_to_str(data, in_size);
-          mem^.Lines.Add(response_str);
+          mem^.Lines.add(response_str);
+
           req := arr_hex_to_str(system_t.response_id,
             length(system_t.response_id));
           if pos(req, response_str) > 0 then
           begin
-             Diag_Struct[number_system].Systems[i].flag_usage:=True;
+            Diag_Struct[number_system].Systems[i].flag_usage := True;
           end;
 
         end;
         inc(i, 1);
       end;
-    J2534_ex.PassThruDisconnect;
-    J2534_ex.PassThruClose;
+      J2534_ex.PassThruDisconnect;
+      J2534_ex.PassThruClose;
     end;
 
   end;
@@ -343,7 +345,10 @@ end;
 
 function TDiag.Start: boolean;
 begin
-  self.RunThread := True;
+  if J2534_ex.PassThruOpen = 0 then
+    if J2534_ex.PassThruConnect = 0 then
+      if J2534_ex.PassThruStartMsgFilter = 0 then
+        self.RunThread := True;
   Result := RunThread;
 end;
 
@@ -351,6 +356,8 @@ function TDiag.Stop;
 begin
   self.RunThread := False;
   self.WaitFor;
+  J2534_ex.PassThruDisconnect;
+  J2534_ex.PassThruClose;
   Result := True;
 end;
 

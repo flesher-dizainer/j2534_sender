@@ -36,6 +36,7 @@ type
     procedure check_adapter_j2534;
     procedure create_diag_class;
     procedure get_list_param;
+    procedure StartDiag;
   public
     { Public declarations }
   end;
@@ -160,6 +161,11 @@ begin
       list_param.Free;
     end;
 
+end;
+
+procedure TMainForm.StartDiag;
+begin
+diag.Start;
 end;
 
 end.

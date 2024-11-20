@@ -6,7 +6,7 @@ uses
   Windows,
   SysUtils,
   Classes,
-  Registry;
+  Registry, dialogs;
 
 type
   TProtocolID = record
@@ -24,7 +24,7 @@ type
 type
   TFilterMSG = record
   const
-    MaskMsg: array [0 .. 3] of byte = ($0, $0, $07, $E8);
+    MaskMsg: array [0 .. 3] of byte = ($0, $0, $07, $FF);
     PatternMsg: array [0 .. 3] of byte = (0, 0, $07, $E8);
     FlowControlMsg: array [0 .. 3] of byte = (0, 0, $07, $E0);
   end;
@@ -101,9 +101,9 @@ type
     // экземпляр структуры TDIAG_data
     DiagInfo: TDIAG_data;
     // экземпляр структуры для отправки сообщений
-    //PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
+    // PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
     // экземпляр структуры для приёма сообщений
-    //PASSTHRU_READ_MSG: TPASSTHRU_MSG;
+    PASSTHRU_READ_MSG: TPASSTHRU_MSG;
     function ClearRxBufer(): integer;
   public
     constructor Create(DLLPath: string);
@@ -225,8 +225,8 @@ constructor TJ2534_v2.Create(DLLPath: string);
 begin
   // обнуляем экземпляры структур
   FillChar(DiagInfo, SizeOf(DiagInfo), 0);
-  //FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
-  //FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
+  // FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
+  // FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
   FDLLHandle := LoadLibrary(PChar(DLLPath));
 
   if FDLLHandle = 0 then
@@ -380,8 +380,8 @@ function TJ2534_v2.PassThruReadMsgs(Data: pointer; Size: PLongWord;
   Timeout: Cardinal): integer;
 var
   NumMsg: integer;
-  count_read:integer;
-  PASSTHRU_READ_MSG: TPASSTHRU_MSG;
+  count_read: integer;
+  // PASSTHRU_READ_MSG: TPASSTHRU_MSG;
 begin
   try
     Size^ := 0;
@@ -390,7 +390,8 @@ begin
     PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
     result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID,
       @PASSTHRU_READ_MSG, @NumMsg, Timeout);
-    count_read:=5;
+    count_read := 10;
+    //showmessage(inttostr(NumMsg));
     while (PASSTHRU_READ_MSG.RxStatus <> 0) and (count_read > 0) do
     begin
       NumMsg := 1;
@@ -398,17 +399,16 @@ begin
       PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
       result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID,
         @PASSTHRU_READ_MSG, @NumMsg, Timeout);
-      count_read:=count_read-1;
+        //showmessage(inttostr(PASSTHRU_READ_MSG.RxStatus));
+      count_read := count_read - 1;
     end;
-
+    //showmessage(inttostr(PASSTHRU_READ_MSG.DataSize));
     Size^ := PASSTHRU_READ_MSG.DataSize;
     move(PASSTHRU_READ_MSG.Data[0], Data^, Size^);
   except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruReadMsgs '+self.GetErrorDescriptions(result));
-    end;
+    // Обработка ошибки
+    raise Exception.Create('Ошибка PassThruReadMsgs ' +
+      self.GetErrorDescriptions(result));
   end;
 end;
 
