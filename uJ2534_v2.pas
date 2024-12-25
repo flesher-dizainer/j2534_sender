@@ -108,30 +108,30 @@ type
   public
     constructor Create(DLLPath: string);
     destructor Destroy; override;
-    //открывает шлюз адаптера
+    // открывает шлюз адаптера
     function PassThruOpen(): byte;
-    //закрывает шлюз адаптера
+    // закрывает шлюз адаптера
     function PassThruClose(): byte;
-    //устанавливает соединение с адаптером с аргументами
+    // устанавливает соединение с адаптером с аргументами
     function PassThruConnect(Protocol_id: longWord; flag: longWord;
       BaudRate: longWord): byte; overload;
-    //устанавливает соединение с адаптером с аргументами по умолчанию
+    // устанавливает соединение с адаптером с аргументами по умолчанию
     function PassThruConnect(): byte; overload;
-    //разорвать соединение с адаптером
+    // разорвать соединение с адаптером
     function PassThruDisconnect(): byte;
-    //отправить сообщение в шину
+    // отправить сообщение в шину
     function PassThruWriteMsg(Data: array of byte; Tx_Flag: longWord;
       Timeout: longWord): integer;
-    //получить сообщение из шины
+    // получить сообщение из шины
     function PassThruReadMsgs(Data: pointer; Size: PLongWord;
       Timeout: longWord): integer;
-    //установка фильтров сообшений
+    // установка фильтров сообшений
     function PassThruStartMsgFilter(Filter_type: longWord;
       MaskMsg, PatternMsg, FlowControlMsg: array of byte; TxFlags: longWord)
       : integer; overload;
-    //установка фильтров сообшений описанных в модуле
+    // установка фильтров сообшений описанных в модуле
     function PassThruStartMsgFilter(): integer; overload;
-    //останавливаем фильтр сообщений
+    // останавливаем фильтр сообщений
     function PassThruStopMsgFilter(): integer;
     function PassThrueReadVersion(): TstringList;
     // function ClearRxBufer(): integer;
@@ -298,49 +298,25 @@ end;
 
 function TJ2534_v2.PassThruOpen(): byte;
 begin
-  try
-    // Вызываем метод PassThruOpen, передавая указатель
-    result := TPassThruOpen(nil, @DiagInfo.Device_ID);
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Не удалось открыть шлюз адаптера');
-    end;
-  end;
+  // Вызываем метод PassThruOpen, передавая указатель
+  result := TPassThruOpen(nil, @DiagInfo.Device_ID);
 end;
 
 function TJ2534_v2.PassThruClose(): byte;
 begin
-  try
-    // Вызываем метод PassThruClose
-    result := TPassThruClose(DiagInfo.Device_ID);
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Не удалось закрыть шлюз адаптера');
-    end;
-  end;
+  // Вызываем метод PassThruClose
+  result := TPassThruClose(DiagInfo.Device_ID);
 end;
 
 function TJ2534_v2.PassThruConnect(Protocol_id: Cardinal; flag: Cardinal;
   BaudRate: Cardinal): byte;
 begin
-  try
-    DiagInfo.ProtocilID := Protocol_id;
-    DiagInfo.Flags := flag;
-    DiagInfo.BaudRate := BaudRate;
-    // Вызываем метод PassThruConnect
-    result := TPassThruConnect(DiagInfo.Device_ID, DiagInfo.ProtocilID,
-      DiagInfo.Flags, DiagInfo.BaudRate, @DiagInfo.ChannelID);
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Не удалось установить соединение');
-    end;
-  end;
+  DiagInfo.ProtocilID := Protocol_id;
+  DiagInfo.Flags := flag;
+  DiagInfo.BaudRate := BaudRate;
+  // Вызываем метод PassThruConnect
+  result := TPassThruConnect(DiagInfo.Device_ID, DiagInfo.ProtocilID,
+    DiagInfo.Flags, DiagInfo.BaudRate, @DiagInfo.ChannelID);
 end;
 
 function TJ2534_v2.PassThruConnect(): byte;
@@ -351,15 +327,7 @@ end;
 
 function TJ2534_v2.PassThruDisconnect(): byte;
 begin
-  try
-    result := self.TPassThruDisconnect(self.DiagInfo.ChannelID);
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruDisconnect');
-    end;
-  end;
+  result := self.TPassThruDisconnect(self.DiagInfo.ChannelID);
 end;
 
 function TJ2534_v2.PassThruWriteMsg(Data: array of byte; Tx_Flag: Cardinal;
@@ -368,22 +336,14 @@ var
   num_msg: integer;
   PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
 begin
-  try
-    FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
-    num_msg := 1;
-    PASSTHRU_WRITE_MSG.ProtocolID := self.DiagInfo.ProtocilID;
-    PASSTHRU_WRITE_MSG.TxFlags := Tx_Flag;
-    PASSTHRU_WRITE_MSG.DataSize := length(Data);
-    move(Data[0], PASSTHRU_WRITE_MSG.Data[0], length(Data));
-    result := self.TPassThruWriteMsgs(self.DiagInfo.ChannelID,
-      @PASSTHRU_WRITE_MSG, @num_msg, Timeout);
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruWriteMsgs');
-    end;
-  end;
+  FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
+  num_msg := 1;
+  PASSTHRU_WRITE_MSG.ProtocolID := self.DiagInfo.ProtocilID;
+  PASSTHRU_WRITE_MSG.TxFlags := Tx_Flag;
+  PASSTHRU_WRITE_MSG.DataSize := length(Data);
+  move(Data[0], PASSTHRU_WRITE_MSG.Data[0], length(Data));
+  result := self.TPassThruWriteMsgs(self.DiagInfo.ChannelID,
+    @PASSTHRU_WRITE_MSG, @num_msg, Timeout);
 end;
 
 function TJ2534_v2.PassThruReadMsgs(Data: pointer; Size: PLongWord;
@@ -393,33 +353,27 @@ var
   count_read: integer;
   // PASSTHRU_READ_MSG: TPASSTHRU_MSG;
 begin
-  try
-    Size^ := 0;
-    FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
+  Size^ := 0;
+  FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
+  NumMsg := 1;
+  PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
+  result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID, @PASSTHRU_READ_MSG,
+    @NumMsg, Timeout);
+  count_read := 10;
+  // showmessage(inttostr(NumMsg));
+  while (PASSTHRU_READ_MSG.RxStatus <> 0) and (count_read > 0) do
+  begin
     NumMsg := 1;
+    FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
     PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
     result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID,
       @PASSTHRU_READ_MSG, @NumMsg, Timeout);
-    count_read := 10;
-    //showmessage(inttostr(NumMsg));
-    while (PASSTHRU_READ_MSG.RxStatus <> 0) and (count_read > 0) do
-    begin
-      NumMsg := 1;
-      FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
-      PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
-      result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID,
-        @PASSTHRU_READ_MSG, @NumMsg, Timeout);
-        //showmessage(inttostr(PASSTHRU_READ_MSG.RxStatus));
-      count_read := count_read - 1;
-    end;
-    //showmessage(inttostr(PASSTHRU_READ_MSG.DataSize));
-    Size^ := PASSTHRU_READ_MSG.DataSize;
-    move(PASSTHRU_READ_MSG.Data[0], Data^, Size^);
-  except
-    // Обработка ошибки
-    raise Exception.Create('Ошибка PassThruReadMsgs ' +
-      self.GetErrorDescriptions(result));
+    // showmessage(inttostr(PASSTHRU_READ_MSG.RxStatus));
+    count_read := count_read - 1;
   end;
+  // showmessage(inttostr(PASSTHRU_READ_MSG.DataSize));
+  Size^ := PASSTHRU_READ_MSG.DataSize;
+  move(PASSTHRU_READ_MSG.Data[0], Data^, Size^);
 end;
 
 function TJ2534_v2.PassThruStartMsgFilter(Filter_type: longWord;
@@ -448,18 +402,10 @@ begin
     patter.Data[i] := PatternMsg[i];
     FC.Data[i] := FlowControlMsg[i];
   end;
-  try
-    // ClearRxBufer;
-    result := self.TPassThruStartMsgFilter(self.DiagInfo.ChannelID, Filter_type,
-      @mask, @patter, @FC, @DiagInfo.FilterID);
-    ClearRxBufer;
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruStartMsgFilter');
-    end;
-  end;
+  result := self.TPassThruStartMsgFilter(self.DiagInfo.ChannelID, Filter_type,
+    @mask, @patter, @FC, @DiagInfo.FilterID);
+  ClearRxBufer;
+
 end;
 
 function TJ2534_v2.PassThruStartMsgFilter(): integer;
@@ -472,16 +418,8 @@ end;
 function TJ2534_v2.PassThruStopMsgFilter(): integer;
 { удаление фильтра приёма сообщений }
 begin
-  try
-    result := self.TPassThruStopMsgFilter(self.DiagInfo.ChannelID,
-      self.DiagInfo.FilterID);
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruStopMsgFilter');
-    end;
-  end;
+  result := self.TPassThruStopMsgFilter(self.DiagInfo.ChannelID,
+    self.DiagInfo.FilterID);
 end;
 
 { чтение версии }
@@ -493,46 +431,30 @@ var
 begin
   result := TstringList.Create;
   result.Clear;
-  try
-    err := self.TPassThruReadVersion(self.DiagInfo.Device_ID, @firm_version,
-      @dll_version, @ApiVersion);
-    if (err <> 0) and (err < $1B) then
-    begin
-      result.Add(ERROR_MESS[err]);
-      exit;
-    end;
-    F := 'Firmware Version : ';
-    D := 'DLL Version : ';
-    A := 'API Version : ';
-    for err := 0 to 79 do
-    begin
-      F := F + Char(firm_version[err]);
-      D := D + Char(dll_version[err]);
-      A := A + Char(ApiVersion[err]);
-    end;
-    result.Add(F);
-    result.Add(D);
-    result.Add(A);
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка PassThruReadVersion');
-    end;
+  err := self.TPassThruReadVersion(self.DiagInfo.Device_ID, @firm_version,
+    @dll_version, @ApiVersion);
+  if (err <> 0) and (err < $1B) then
+  begin
+    result.Add(ERROR_MESS[err]);
+    exit;
   end;
+  F := 'Firmware Version : ';
+  D := 'DLL Version : ';
+  A := 'API Version : ';
+  for err := 0 to 79 do
+  begin
+    F := F + Char(firm_version[err]);
+    D := D + Char(dll_version[err]);
+    A := A + Char(ApiVersion[err]);
+  end;
+  result.Add(F);
+  result.Add(D);
+  result.Add(A);
 end;
 
 function TJ2534_v2.ClearRxBufer(): integer;
 begin
-  try
-    result := self.TPassThruIoctl(self.DiagInfo.ChannelID, $08, nil, nil);
-  except
-    on E: Exception do
-    begin
-      // Обработка ошибки
-      raise Exception.Create('Ошибка ClearRx');
-    end;
-  end;
+  result := self.TPassThruIoctl(self.DiagInfo.ChannelID, $08, nil, nil);
 end;
 
 function TJ2534_v2.GetErrorDescriptions(error_code: integer): string;

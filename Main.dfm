@@ -34,6 +34,9 @@ object MainForm: TMainForm
     ExplicitHeight = 481
     object TabSheet1: TTabSheet
       Caption = 'Main'
+      DesignSize = (
+        624
+        476)
       object ComboBoxDll: TComboBox
         Left = 3
         Top = 3
@@ -55,6 +58,7 @@ object MainForm: TMainForm
         Top = 125
         Width = 206
         Height = 308
+        Anchors = [akLeft, akTop, akBottom]
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -17
@@ -69,6 +73,7 @@ object MainForm: TMainForm
         Top = 3
         Width = 402
         Height = 464
+        Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 3
       end
       object ButtonConnect: TButton
@@ -102,6 +107,7 @@ object MainForm: TMainForm
         Top = 442
         Width = 103
         Height = 25
+        Anchors = [akLeft, akBottom]
         Caption = #1057#1090#1072#1088#1090
         TabOrder = 7
       end
@@ -110,6 +116,7 @@ object MainForm: TMainForm
         Top = 442
         Width = 97
         Height = 25
+        Anchors = [akLeft, akBottom]
         Caption = #1057#1090#1086#1087
         TabOrder = 8
       end
