@@ -108,20 +108,30 @@ type
   public
     constructor Create(DLLPath: string);
     destructor Destroy; override;
+    //открывает шлюз адаптера
     function PassThruOpen(): byte;
+    //закрывает шлюз адаптера
     function PassThruClose(): byte;
+    //устанавливает соединение с адаптером с аргументами
     function PassThruConnect(Protocol_id: longWord; flag: longWord;
       BaudRate: longWord): byte; overload;
+    //устанавливает соединение с адаптером с аргументами по умолчанию
     function PassThruConnect(): byte; overload;
+    //разорвать соединение с адаптером
     function PassThruDisconnect(): byte;
+    //отправить сообщение в шину
     function PassThruWriteMsg(Data: array of byte; Tx_Flag: longWord;
       Timeout: longWord): integer;
+    //получить сообщение из шины
     function PassThruReadMsgs(Data: pointer; Size: PLongWord;
       Timeout: longWord): integer;
+    //установка фильтров сообшений
     function PassThruStartMsgFilter(Filter_type: longWord;
       MaskMsg, PatternMsg, FlowControlMsg: array of byte; TxFlags: longWord)
       : integer; overload;
+    //установка фильтров сообшений описанных в модуле
     function PassThruStartMsgFilter(): integer; overload;
+    //останавливаем фильтр сообщений
     function PassThruStopMsgFilter(): integer;
     function PassThrueReadVersion(): TstringList;
     // function ClearRxBufer(): integer;

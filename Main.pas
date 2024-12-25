@@ -157,7 +157,6 @@ begin
         if Diag.Diag_Struct[ComboBoxDiag.ItemIndex].Systems[i].flag_usage = False
         then
           CheckListBoxDiag.ItemEnabled[i] := False;
-
       list_param.Free;
     end;
 
@@ -165,7 +164,7 @@ end;
 
 procedure TMainForm.StartDiag;
 begin
-diag.Start;
+diag.Start();
 end;
 
 end.

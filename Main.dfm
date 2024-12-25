@@ -2,8 +2,8 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'J2534_Logger'
-  ClientHeight = 518
-  ClientWidth = 628
+  ClientHeight = 525
+  ClientWidth = 632
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,23 +15,23 @@ object MainForm: TMainForm
   TextHeight = 15
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 499
-    Width = 628
+    Top = 506
+    Width = 632
     Height = 19
     Panels = <>
-    ExplicitTop = 490
-    ExplicitWidth = 622
+    ExplicitTop = 481
+    ExplicitWidth = 616
   end
   object PageControl1: TPageControl
     Left = 0
     Top = 0
-    Width = 628
-    Height = 499
+    Width = 632
+    Height = 506
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 1
-    ExplicitWidth = 622
-    ExplicitHeight = 490
+    ExplicitWidth = 616
+    ExplicitHeight = 481
     object TabSheet1: TTabSheet
       Caption = 'Main'
       object ComboBoxDll: TComboBox
