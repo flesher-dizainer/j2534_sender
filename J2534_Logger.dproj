@@ -104,6 +104,7 @@
         </DCCReference>
         <DCCReference Include="uDiag.pas"/>
         <DCCReference Include="uJ2534_v2.pas"/>
+        <DCCReference Include="uWBO.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -127,6 +128,12 @@
             </Delphi.Personality>
             <Deployment Version="4">
                 <DeployFile LocalName="Win32\Debug\J2534_Logger.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>J2534_Logger.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win32\Release\J2534_Logger.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>J2534_Logger.exe</RemoteName>
                         <Overwrite>true</Overwrite>

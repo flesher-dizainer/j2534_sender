@@ -1,15 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899.12.30 00:00:00.000.864,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Unit2.dfm=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Main.dfm</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.087,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\J2534_Logger.dproj=D:\distr\distr\project_delphi\j2534_sender\J2534_Logger.dproj</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.475,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Project2.dproj=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\J2534_Logger.dproj</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.025,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Main.dfm=D:\distr\distr\project_delphi\j2534_sender\Main.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.267,=D:\distr\distr\project_delphi\j2534_sender\uJ2534_v2.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.475,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\J2534_Logger.dproj=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Project2.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.864,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Main.dfm=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Unit2.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.087,D:\distr\distr\project_delphi\j2534_sender\J2534_Logger.dproj=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\J2534_Logger.dproj</Transaction>
     <Transaction>1899.12.30 00:00:00.000.139,=D:\distr\distr\project_delphi\j2534_sender\uDiag.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.864,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Main.pas=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.240,=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
     <Transaction>1899.12.30 00:00:00.000.142,=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.864,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Unit2.pas=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Main.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.267,=D:\distr\distr\project_delphi\j2534_sender\uJ2534_v2.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.025,C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Main.pas=D:\distr\distr\project_delphi\j2534_sender\Main.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.025,D:\distr\distr\project_delphi\j2534_sender\Main.pas=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Main.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.025,D:\distr\distr\project_delphi\j2534_sender\Main.dfm=C:\Users\Admin\Documents\Embarcadero\Studio\Projects\Main.dfm</Transaction>
+    <Transaction>2024.12.25 09:14:54.452,=D:\distr\distr\project_delphi\j2534_sender\uWBO.pas</Transaction>
   </Transactions>
 </BorlandProject>

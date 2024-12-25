@@ -1,4 +1,4 @@
-unit uWBO;
+п»їunit uWBO;
 
 interface
 
@@ -13,17 +13,17 @@ uses
 
 type
   TLcThreat = class(TThread)
-  hCOMPort:  THandle;     // COM-порт
+  hCOMPort:  THandle;     // COM-РїРѕСЂС‚
   private
-    AEM:boolean;//используется шдк АЕМ
-    LC_1:boolean;//используется ШДК LC-1
-    VEMS:boolean;//используется ШДК АЕМ
-    SizePackVems:cardinal;//размер пакета от шдк
-    SLE:integer;//задержка запроса пакета vems, инициализация
+    AEM:boolean;//РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ С€РґРє РђР•Рњ
+    LC_1:boolean;//РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РЁР”Рљ LC-1
+    VEMS:boolean;//РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РЁР”Рљ РђР•Рњ
+    SizePackVems:cardinal;//СЂР°Р·РјРµСЂ РїР°РєРµС‚Р° РѕС‚ С€РґРє
+    SLE:integer;//Р·Р°РґРµСЂР¶РєР° Р·Р°РїСЂРѕСЃР° РїР°РєРµС‚Р° vems, РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
  // Sensor_ID:byte;
-  procedure ReadPort_LC;  // Чтение из порта lc-1
-  procedure ReadPortVems;//чтение VEMS
-  procedure ReadPort_AEM; //чтение из порта AEM
+  procedure ReadPort_LC;  // Р§С‚РµРЅРёРµ РёР· РїРѕСЂС‚Р° lc-1
+  procedure ReadPortVems;//С‡С‚РµРЅРёРµ VEMS
+  procedure ReadPort_AEM; //С‡С‚РµРЅРёРµ РёР· РїРѕСЂС‚Р° AEM
   Procedure GenAFR(data: array of byte);
   function OpenPortLC():boolean;
   procedure ClosePortLC;
@@ -31,12 +31,12 @@ type
   protected
     procedure Execute; override;
     Public
-    AFR:REAL;//состав смеси на ШДК
-    stochiometric:real;//стехиометрия с шдк
-    Message_LC1:string;//сообщение о состоянии ЛС-1
-    lc:boolean;//флаг включенного шдк
-    ExitReadPort:boolean;//флаг прекращения чтения с порта
-    LC_CONNECT : boolean;//флаг подключенного порта
+    AFR:REAL;//СЃРѕСЃС‚Р°РІ СЃРјРµСЃРё РЅР° РЁР”Рљ
+    stochiometric:real;//СЃС‚РµС…РёРѕРјРµС‚СЂРёСЏ СЃ С€РґРє
+    Message_LC1:string;//СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРѕСЃС‚РѕСЏРЅРёРё Р›РЎ-1
+    lc:boolean;//С„Р»Р°Рі РІРєР»СЋС‡РµРЅРЅРѕРіРѕ С€РґРє
+    ExitReadPort:boolean;//С„Р»Р°Рі РїСЂРµРєСЂР°С‰РµРЅРёСЏ С‡С‚РµРЅРёСЏ СЃ РїРѕСЂС‚Р°
+    LC_CONNECT : boolean;//С„Р»Р°Рі РїРѕРґРєР»СЋС‡РµРЅРЅРѕРіРѕ РїРѕСЂС‚Р°
     EGT:Integer;
     procedure stop;
     destructor  Destroy;override;
@@ -91,14 +91,14 @@ begin
   end;
 
   ExitReadPort:=False;
-  // Выставляем флаг работы потока
+  // Р’С‹СЃС‚Р°РІР»СЏРµРј С„Р»Р°Рі СЂР°Р±РѕС‚С‹ РїРѕС‚РѕРєР°
  // RunThread := false;
  openportlc;
   RunThread := true;
   resume;
 end;
 
-//протокол чтения LC-1
+//РїСЂРѕС‚РѕРєРѕР» С‡С‚РµРЅРёСЏ LC-1
 procedure TLcThreat.ReadPort_LC;
 var
   Errors, Size, NumberOfBytesReaded: Cardinal;
@@ -112,16 +112,16 @@ var
 begin
 // ---------------------
 //LengthPack:=((( data[ 0 ] and 1 ) shl 7 ) + ( data[ 1 ] and $7F ));
-//длина пакета указывается во втором байте
-//длина пакета = (data[1] and $7F) * 2, умножить на 2, потому что слово двухбайтное и
-//data 1 and 2 это заголовок двухбайтный
+//РґР»РёРЅР° РїР°РєРµС‚Р° СѓРєР°Р·С‹РІР°РµС‚СЃСЏ РІРѕ РІС‚РѕСЂРѕРј Р±Р°Р№С‚Рµ
+//РґР»РёРЅР° РїР°РєРµС‚Р° = (data[1] and $7F) * 2, СѓРјРЅРѕР¶РёС‚СЊ РЅР° 2, РїРѕС‚РѕРјСѓ С‡С‚Рѕ СЃР»РѕРІРѕ РґРІСѓС…Р±Р°Р№С‚РЅРѕРµ Рё
+//data 1 and 2 СЌС‚Рѕ Р·Р°РіРѕР»РѕРІРѕРє РґРІСѓС…Р±Р°Р№С‚РЅС‹Р№
 //---------------------
-//сброс данных с порта
+//СЃР±СЂРѕСЃ РґР°РЅРЅС‹С… СЃ РїРѕСЂС‚Р°
 if not  PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR) then begin
- ClosePortLC;//закрываем порт, если ну удалось очистить порт
- if not openportLC then exit;//пробуем снова открыть, если не удалось то выходим
+ ClosePortLC;//Р·Р°РєСЂС‹РІР°РµРј РїРѕСЂС‚, РµСЃР»Рё РЅСѓ СѓРґР°Р»РѕСЃСЊ РѕС‡РёСЃС‚РёС‚СЊ РїРѕСЂС‚
+ if not openportLC then exit;//РїСЂРѕР±СѓРµРј СЃРЅРѕРІР° РѕС‚РєСЂС‹С‚СЊ, РµСЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ С‚Рѕ РІС‹С…РѕРґРёРј
 end;
-//цикл ожидания данных на порту
+//С†РёРєР» РѕР¶РёРґР°РЅРёСЏ РґР°РЅРЅС‹С… РЅР° РїРѕСЂС‚Сѓ
 SleepCount:=0;
 repeat
  sleep(5);
@@ -130,12 +130,12 @@ repeat
  Size := COMStat.cbInQue;
  Count := Size;
 until (count > 0) or (SleepCount > 2000) or (ExitReadPort) ;
-   //проверяем флаг на выход чтения порта
+   //РїСЂРѕРІРµСЂСЏРµРј С„Р»Р°Рі РЅР° РІС‹С…РѕРґ С‡С‚РµРЅРёСЏ РїРѕСЂС‚Р°
    if ExitReadPort then begin
     PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR);
     exit;
    end;
-//если Count > 0 значит читаем порт
+//РµСЃР»Рё Count > 0 Р·РЅР°С‡РёС‚ С‡РёС‚Р°РµРј РїРѕСЂС‚
 if Count > 0 then
  ReadFile( hCOMPort, Data, 1, NumberOfBytesReaded, nil)
  else begin
@@ -145,7 +145,7 @@ if Count > 0 then
  end;
 if not data[0] and $A2 = $A2 then exit;
 //
- //читаем второй заголовок
+ //С‡РёС‚Р°РµРј РІС‚РѕСЂРѕР№ Р·Р°РіРѕР»РѕРІРѕРє
 SleepCount:=0;
 repeat
  sleep(5);
@@ -154,17 +154,17 @@ repeat
  Size := COMStat.cbInQue;
  Count := Size;
 until (count > 0) or (SleepCount > 2000) or (ExitReadPort) ;
-   //проверяем флаг на выход чтения порта
+   //РїСЂРѕРІРµСЂСЏРµРј С„Р»Р°Рі РЅР° РІС‹С…РѕРґ С‡С‚РµРЅРёСЏ РїРѕСЂС‚Р°
    if ExitReadPort then begin
     PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR);
     exit;
    end;
-//если Count > 0 значит читаем порт
+//РµСЃР»Рё Count > 0 Р·РЅР°С‡РёС‚ С‡РёС‚Р°РµРј РїРѕСЂС‚
 if Count > 0 then
  ReadFile( hCOMPort, Data, 1, NumberOfBytesReaded, nil)
  else exit;
 if not data[0] and $80 = $80 then exit;
-//читаем пакет из 4 байт
+//С‡РёС‚Р°РµРј РїР°РєРµС‚ РёР· 4 Р±Р°Р№С‚
 SleepCount:=0;
 repeat
  sleep(5);
@@ -173,12 +173,12 @@ repeat
  Size := COMStat.cbInQue;
  Count := Size;
 until (count > 0) or (SleepCount > 4000) or (ExitReadPort) ;
-   //проверяем флаг на выход чтения порта
+   //РїСЂРѕРІРµСЂСЏРµРј С„Р»Р°Рі РЅР° РІС‹С…РѕРґ С‡С‚РµРЅРёСЏ РїРѕСЂС‚Р°
    if ExitReadPort then begin
     PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR);
     exit;
    end;
-//если Count > 3 значит читаем порт
+//РµСЃР»Рё Count > 3 Р·РЅР°С‡РёС‚ С‡РёС‚Р°РµРј РїРѕСЂС‚
 if Count > 3 then
  ReadFile( hCOMPort, Data, 4, NumberOfBytesReaded, nil)
  else exit;
@@ -187,7 +187,7 @@ if Count > 3 then
  dataafr[i]:=data[i];
  GenAFR(dataafr);
 end;
-// чтение шдк вемс
+// С‡С‚РµРЅРёРµ С€РґРє РІРµРјСЃ
 procedure TLCTHREAt.ReadPortVems;
 var
 WriteDataPort:array[0..1] of byte;
@@ -197,18 +197,18 @@ SL:integer;
 DATA:array [0..100] of byte;
 
 begin
-//----- проверка очистки порта ----------
+//----- РїСЂРѕРІРµСЂРєР° РѕС‡РёСЃС‚РєРё РїРѕСЂС‚Р° ----------
 if not  PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR) then begin
- ClosePortLC;//закрываем порт, если ну удалось очистить порт
- if not openportLC then exit;//пробуем снова открыть, если не удалось то выходим
+ ClosePortLC;//Р·Р°РєСЂС‹РІР°РµРј РїРѕСЂС‚, РµСЃР»Рё РЅСѓ СѓРґР°Р»РѕСЃСЊ РѕС‡РёСЃС‚РёС‚СЊ РїРѕСЂС‚
+ if not openportLC then exit;//РїСЂРѕР±СѓРµРј СЃРЅРѕРІР° РѕС‚РєСЂС‹С‚СЊ, РµСЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ С‚Рѕ РІС‹С…РѕРґРёРј
 end;
-//----- отправка запроса на данные -----------
+//----- РѕС‚РїСЂР°РІРєР° Р·Р°РїСЂРѕСЃР° РЅР° РґР°РЅРЅС‹Рµ -----------
 WriteDataPort[0]:=$41;
 WriteDataPort[1]:=$2E;
 if not WriteFile( hCOMPort, WriteDataPort,2, NumberOfBytesWritten, nil ) then
 exit;
-//----- читаем пакет данных из порта -----------------------
-  // Считываем данные
+//----- С‡РёС‚Р°РµРј РїР°РєРµС‚ РґР°РЅРЅС‹С… РёР· РїРѕСЂС‚Р° -----------------------
+  // РЎС‡РёС‚С‹РІР°РµРј РґР°РЅРЅС‹Рµ
   SL:=0;
   repeat
   SLEEP(sle);
@@ -221,8 +221,8 @@ exit;
   sle:=1;
   end;
   if not ReadFile( hCOMPort, Data, Size, NumberOfBytesReaded, nil)then exit;
-  //------- теперь проверка флагов о состоянии шдк ------------
-  //12 байт проверочный
+  //------- С‚РµРїРµСЂСЊ РїСЂРѕРІРµСЂРєР° С„Р»Р°РіРѕРІ Рѕ СЃРѕСЃС‚РѕСЏРЅРёРё С€РґРє ------------
+  //12 Р±Р°Р№С‚ РїСЂРѕРІРµСЂРѕС‡РЅС‹Р№
   if data[12] and $60 = $60 then begin
    LC:=False;
    Message_LC1:='WarmUP';
@@ -235,7 +235,7 @@ exit;
    AFR:=14.7*(data[0]*256+data[1])/16384;
   end;
 end;
-//протокол чтения АЕМ
+//РїСЂРѕС‚РѕРєРѕР» С‡С‚РµРЅРёСЏ РђР•Рњ
 procedure TLcThreat.ReadPort_AEM;
 var
   id_data:byte;
@@ -249,38 +249,38 @@ var
   filename:string;
  // s:string;
   count_sleep:integer;
-  pack_good:boolean; //флаг, что пакет считан
+  pack_good:boolean; //С„Р»Р°Рі, С‡С‚Рѕ РїР°РєРµС‚ СЃС‡РёС‚Р°РЅ
 begin
-//очистка содержимого порта
+//РѕС‡РёСЃС‚РєР° СЃРѕРґРµСЂР¶РёРјРѕРіРѕ РїРѕСЂС‚Р°
 if not  PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR) then begin
- ClosePortLC;//закрываем порт, если ну удалось очистить порт
+ ClosePortLC;//Р·Р°РєСЂС‹РІР°РµРј РїРѕСЂС‚, РµСЃР»Рё РЅСѓ СѓРґР°Р»РѕСЃСЊ РѕС‡РёСЃС‚РёС‚СЊ РїРѕСЂС‚
  if not openportLC then begin
   Message_LC1:='LC: error open port';
-  exit;//пробуем снова открыть, если не удалось то выходим
+  exit;//РїСЂРѕР±СѓРµРј СЃРЅРѕРІР° РѕС‚РєСЂС‹С‚СЊ, РµСЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ С‚Рѕ РІС‹С…РѕРґРёРј
   end;
 end;
-  // Считываем данные
+  // РЎС‡РёС‚С‹РІР°РµРј РґР°РЅРЅС‹Рµ
   count_sleep:=0;
   count_data:=1;
   id_data:=1;
   pack_good:=false;
-//--------------------- зацикливание формирования пакета -------------------------
+//--------------------- Р·Р°С†РёРєР»РёРІР°РЅРёРµ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РїР°РєРµС‚Р° -------------------------
   repeat
   SLEEP(1);
-  ClearCommError( hCOMPort, Errors, @COMStat ); //проверка наличия симоволов в порту
-  Size := COMStat.cbInQue;  //количество байт в порту
-//---------------------------формироание пакета----------------------
+  ClearCommError( hCOMPort, Errors, @COMStat ); //РїСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ СЃРёРјРѕРІРѕР»РѕРІ РІ РїРѕСЂС‚Сѓ
+  Size := COMStat.cbInQue;  //РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р°Р№С‚ РІ РїРѕСЂС‚Сѓ
+//---------------------------С„РѕСЂРјРёСЂРѕР°РЅРёРµ РїР°РєРµС‚Р°----------------------
   if Size >= count_data then begin
    ReadFile( hCOMPort, Data, count_data, NumberOfBytesReaded, nil);
 //---------
   case id_data of
-  //пакет данных
+  //РїР°РєРµС‚ РґР°РЅРЅС‹С…
   3:begin
    pack_good:=true;
    id_data:=1;
    count_data:=1;
   end;
-   //второй байт заголовка
+   //РІС‚РѕСЂРѕР№ Р±Р°Р№С‚ Р·Р°РіРѕР»РѕРІРєР°
   2:begin
     if data[0]=$0A then begin
      id_data:=3;
@@ -290,7 +290,7 @@ end;
      count_data:=1;
     end;
   end;
-  //первый байт заголовка
+  //РїРµСЂРІС‹Р№ Р±Р°Р№С‚ Р·Р°РіРѕР»РѕРІРєР°
    1:begin 
     if data[0]=$0D then begin
      id_data:=2;
@@ -300,17 +300,17 @@ end;
   end;
 //---------
   end;
-//---------------------- end формирование пакета -------------------------------------
+//---------------------- end С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ РїР°РєРµС‚Р° -------------------------------------
  inc (count_sleep);
   until (pack_good = true) or (count_sleep > 5000) ;
-  //определяем начало заголовка пакета $0D
+  //РѕРїСЂРµРґРµР»СЏРµРј РЅР°С‡Р°Р»Рѕ Р·Р°РіРѕР»РѕРІРєР° РїР°РєРµС‚Р° $0D
   if not pack_good then begin
     Message_LC1:='LC:no data';
     exit;
   end;
-//------------------ конец цикла формирования пакета -----------------------
+//------------------ РєРѕРЅРµС† С†РёРєР»Р° С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РїР°РєРµС‚Р° -----------------------
 
-//-------------- разбор пакета данных ----------------------------
+//-------------- СЂР°Р·Р±РѕСЂ РїР°РєРµС‚Р° РґР°РЅРЅС‹С… ----------------------------
    Test:=chr(data[0])+chr(data[1])+chr(data[2])+chr(data[3]);
    Test:=StringReplace(test,'.',',', [rfReplaceAll, rfIgnoreCase]);
    Message_LC1:=Test;
@@ -323,13 +323,13 @@ end;
 //----------------------------------------------------------------------
 
 
-//-------- проверка очистки порта -------------------
+//-------- РїСЂРѕРІРµСЂРєР° РѕС‡РёСЃС‚РєРё РїРѕСЂС‚Р° -------------------
 if not  PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR) then showmessage('Error Lc Port');
 {  
   ReadFile( hCOMPort, Data, 1, NumberOfBytesReaded, nil);
    if data[0]=$0D then begin
 
-   //---проверяем второй байт заголовка пакета
+   //---РїСЂРѕРІРµСЂСЏРµРј РІС‚РѕСЂРѕР№ Р±Р°Р№С‚ Р·Р°РіРѕР»РѕРІРєР° РїР°РєРµС‚Р°
     repeat
      ClearCommError( hCOMPort, Errors, @COMStat );
      Size := COMStat.cbInQue;
@@ -338,15 +338,15 @@ if not  PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR) then showmessage('Err
 
       ReadFile( hCOMPort, Data, 1, NumberOfBytesReaded, nil);
        if data[0]=$0A then begin
-       //читаем весь оставшийся пакет и ещё один байт начала заголовка
+       //С‡РёС‚Р°РµРј РІРµСЃСЊ РѕСЃС‚Р°РІС€РёР№СЃСЏ РїР°РєРµС‚ Рё РµС‰С‘ РѕРґРёРЅ Р±Р°Р№С‚ РЅР°С‡Р°Р»Р° Р·Р°РіРѕР»РѕРІРєР°
            repeat
             ClearCommError( hCOMPort, Errors, @COMStat );
             Size := COMStat.cbInQue;
             Count := Size;
           until count > 4 ;
         ReadFile( hCOMPort, Data, 5, NumberOfBytesReaded, nil);
-        if data[4]=$0D then begin //если после пакета снова заголовок, то пакет истина
-        //сохраняем в лог протокол без заголовка
+        if data[4]=$0D then begin //РµСЃР»Рё РїРѕСЃР»Рµ РїР°РєРµС‚Р° СЃРЅРѕРІР° Р·Р°РіРѕР»РѕРІРѕРє, С‚Рѕ РїР°РєРµС‚ РёСЃС‚РёРЅР°
+        //СЃРѕС…СЂР°РЅСЏРµРј РІ Р»РѕРі РїСЂРѕС‚РѕРєРѕР» Р±РµР· Р·Р°РіРѕР»РѕРІРєР°
          S:=FormatDateTime( 'tt', now ) + '   ' + IntToHex( data[0],2 )+' '+IntToHex( data[1],2 )+' '+inttohex(data[2],2)+' '+IntToHex(data[3],2);
          fileName := 'LogAEM.txt';
          if not FileExists(fileName) then begin
@@ -359,7 +359,7 @@ if not  PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR) then showmessage('Err
          WriteLn(LogLC, s);
          CloseFile(LogLC);
 
-         //очистка порта от накопленных данных, чтоб всё чётко работало
+         //РѕС‡РёСЃС‚РєР° РїРѕСЂС‚Р° РѕС‚ РЅР°РєРѕРїР»РµРЅРЅС‹С… РґР°РЅРЅС‹С…, С‡С‚РѕР± РІСЃС‘ С‡С‘С‚РєРѕ СЂР°Р±РѕС‚Р°Р»Рѕ
       
         //PurgeComm(hCOMPort,PURGE_RXCLEAR);
       //  exit;
@@ -445,9 +445,9 @@ var
  DCB: TDCB;
 begin
    hCOMPort := CreateFile( PChar( lc_data.Port ), Generic_Read + Generic_Write, 0 , nil, Open_Existing, File_Attribute_Normal, 0 );
-  // Проверяем отсутствие ошибок при отрытии
+  // РџСЂРѕРІРµСЂСЏРµРј РѕС‚СЃСѓС‚СЃС‚РІРёРµ РѕС€РёР±РѕРє РїСЂРё РѕС‚СЂС‹С‚РёРё
   if hCOMPort = Invalid_Handle_Value then begin
- //  Application.MessageBox(PChar( 'Ошибка открытия порта ' + lc_data.Port ), 'Ошибка',
+ //  Application.MessageBox(PChar( 'РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ РїРѕСЂС‚Р° ' + lc_data.Port ), 'РћС€РёР±РєР°',
                                 //  MB_ICONWARNING + MB_OK );
     lc_data.PortOpen:=false;
     LC_CONNECT:=false;
@@ -455,10 +455,10 @@ begin
   end;
   lc_data.PortOpen:=true;
   LC_CONNECT:=true;
-  Message_LC1:='LC: Подключено';
+  Message_LC1:='LC: РџРѕРґРєР»СЋС‡РµРЅРѕ';
   PurgeComm(hCOMPort,PURGE_TXCLEAR or PURGE_RXCLEAR);
   //PurgeComm(hCOMPort,PURGE_RXCLEAR);
-  // Выставляем настройки порта для LC_1
+  // Р’С‹СЃС‚Р°РІР»СЏРµРј РЅР°СЃС‚СЂРѕР№РєРё РїРѕСЂС‚Р° РґР»СЏ LC_1
   if (LC_1) or (vems) then  begin
   GetCommState( hCOMPort, DCB );
   DCB.BaudRate := 19200; //BaudRate;
@@ -466,7 +466,7 @@ begin
   DCB.Parity   := NOPARITY;
   DCB.StopBits := ONESTOPBIT;
   end;
-  //выставляем настройки порта для АЕМ
+  //РІС‹СЃС‚Р°РІР»СЏРµРј РЅР°СЃС‚СЂРѕР№РєРё РїРѕСЂС‚Р° РґР»СЏ РђР•Рњ
   if AEM then  begin
   GetCommState( hCOMPort, DCB );
   DCB.BaudRate := 9600; //BaudRate;
@@ -474,9 +474,9 @@ begin
   DCB.Parity   := NOPARITY;
   DCB.StopBits := ONESTOPBIT;
   end;
-  // Проверка настройки порта
+  // РџСЂРѕРІРµСЂРєР° РЅР°СЃС‚СЂРѕР№РєРё РїРѕСЂС‚Р°
   if not SetCommState( hCOMPort, DCB ) then begin
-   Application.MessageBox(PChar( 'Ошибка установки настроек порта ШДК ' + lc_data.Port ), 'Ошибка',
+   Application.MessageBox(PChar( 'РћС€РёР±РєР° СѓСЃС‚Р°РЅРѕРІРєРё РЅР°СЃС‚СЂРѕРµРє РїРѕСЂС‚Р° РЁР”Рљ ' + lc_data.Port ), 'РћС€РёР±РєР°',
                                   MB_ICONWARNING + MB_OK );
     ClosePortLC;
     Exit(false);
@@ -489,7 +489,7 @@ if lc_data.PortOpen then begin
   CloseHandle( hCOMPort );
   lc_data.PortOpen:=false;
   LC_CONNECT:=false;
-  Message_LC1:='LC: Отключено';
+  Message_LC1:='LC: РћС‚РєР»СЋС‡РµРЅРѕ';
 end;
 end;
 end.
