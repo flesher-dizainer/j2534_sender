@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls, uDiag,
-  uJ2534_v2, Vcl.CheckLst;
+  uJ2534_v2, uWBO, Vcl.CheckLst;
 
 type
   TMainForm = class(TForm)
@@ -32,9 +32,11 @@ type
     StringListDll: TstringList;
     J2534: TJ2534_v2;
     Diag: TDiag;
+    Wbo: TuWBO;
     procedure create_class_j2534;
     procedure check_adapter_j2534;
     procedure create_diag_class;
+    procedure create_class_wbo;
     procedure get_list_param;
     procedure StartDiag;
   public
@@ -51,14 +53,21 @@ implementation
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FreeAndNil(StringListDll);
+
   if Diag <> nil then
   begin
     Diag.Stop;
     Diag.Free;
   end;
+
   if J2534 <> nil then
   begin
     FreeAndNil(J2534);
+  end;
+
+  if Wbo <> nil then
+  begin
+    FreeAndNil(Wbo);
   end;
 end;
 
@@ -140,6 +149,14 @@ begin
 
 end;
 
+procedure TMainForm.create_class_wbo;
+begin
+  if Wbo = nil then
+  begin
+    Wbo := TuWBO.Create(True, 1);
+  end;
+end;
+
 procedure TMainForm.get_list_param;
 var
   list_param: TstringList;
@@ -164,7 +181,7 @@ end;
 
 procedure TMainForm.StartDiag;
 begin
-diag.Start();
+  Diag.Start();
 end;
 
 end.
