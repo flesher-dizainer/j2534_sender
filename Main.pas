@@ -23,6 +23,7 @@ type
     ButtonSetDiag: TButton;
     ButtonStartDiag: TButton;
     ButtonStopDiag: TButton;
+    ComboBox1: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ButtonConnectClick(Sender: TObject);
@@ -127,7 +128,6 @@ begin
     error_description := J2534.GetErrorDescriptions(err_number);
     Memo1.Lines.Add('Close adapter = ' + error_description);
   end;
-
 end;
 
 procedure TMainForm.create_diag_class;
@@ -169,10 +169,8 @@ begin
       Diag.CheckListData(ComboBoxDiag.ItemIndex, @Memo1);
       list_param := Diag.GetListParam(ComboBoxDiag.ItemIndex);
       CheckListBoxDiag.Items.AddStrings(list_param);
-      for i := 0 to length(Diag.Diag_Struct[ComboBoxDiag.ItemIndex]
-        .Systems) - 1 do
-        if Diag.Diag_Struct[ComboBoxDiag.ItemIndex].Systems[i].flag_usage = False
-        then
+      for i := 0 to length(Diag.Diag_Struct[ComboBoxDiag.ItemIndex].Systems) - 1 do
+        if Diag.Diag_Struct[ComboBoxDiag.ItemIndex].Systems[i].flag_usage = False then
           CheckListBoxDiag.ItemEnabled[i] := False;
       list_param.Free;
     end;

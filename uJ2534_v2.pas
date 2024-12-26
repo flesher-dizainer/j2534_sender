@@ -1,12 +1,17 @@
 ﻿unit uJ2534_v2;
-
+{
+Модуль работы с J2534 адаптером через dll адаптера.
+Функция модуля. Возвращает список путей к dll, установленных в системе.
+В функцию нужно передать указатель на StringList, для заполнения названий адаптеров. 
+function GetListDll(StringList: pointer): TstringList;
+}
 interface
 
 uses
   Windows,
   SysUtils,
   Classes,
-  Registry, dialogs;
+  Registry;
 
 type
   TProtocolID = record
@@ -72,30 +77,21 @@ type
     // закрыть шлюз связи с адаптером
     TPassThruClose: function(DeviceID: longWord): byte; stdcall;
     // Установка соединения по протоколу
-    TPassThruConnect: function(DeviceID: longWord; ProtocolID: longWord;
-      Flags: longWord; BaudRate: longWord; pChannelID: PLongWord)
-      : integer; stdcall;
+    TPassThruConnect: function(DeviceID: longWord; ProtocolID: longWord; Flags: longWord; BaudRate: longWord; pChannelID: PLongWord): integer; stdcall;
     // разьединение связи
     TPassThruDisconnect: function(DeviceID: longWord): byte; stdcall;
     // Чтение принятого пакета  ChannelID - идентификатор канала
-    TPassThruReadMsgs: function(ChannelID: longWord; TPASSTHRU_MSG_: pointer;
-      pNumMsgs: Pint; Timeout: longWord): integer; stdcall;
+    TPassThruReadMsgs: function(ChannelID: longWord; TPASSTHRU_MSG_: pointer; pNumMsgs: Pint; Timeout: longWord): integer; stdcall;
     // отправка сообщения адаптеру
-    TPassThruWriteMsgs: function(ChannelID: longWord; TPASSTHRU_MSG_: pointer;
-      pNumMsgs: Pint; Timeout: longWord): integer; stdcall;
+    TPassThruWriteMsgs: function(ChannelID: longWord; TPASSTHRU_MSG_: pointer; pNumMsgs: Pint; Timeout: longWord): integer; stdcall;
     // установка фильтра сообщения
-    TPassThruStartMsgFilter: function(ChannelID: longWord; FilterType: longWord;
-      pMaskMsg: pointer; pPatternMsg: pointer; pFlowControlMsg: pointer;
-      FilterID: pointer): integer; stdcall;
+    TPassThruStartMsgFilter: function(ChannelID: longWord; FilterType: longWord; pMaskMsg: pointer; pPatternMsg: pointer; pFlowControlMsg: pointer; FilterID: pointer): integer; stdcall;
     // удаление фильтров сообщений
-    TPassThruStopMsgFilter: function(ChannelID: longWord; FilterID: longWord)
-      : integer; stdcall;
+    TPassThruStopMsgFilter: function(ChannelID: longWord; FilterID: longWord): integer; stdcall;
     // чтение версии прошивки, длл, api
-    TPassThruReadVersion: function(DeviceID: longWord;
-      pFirmwareVersion, pDllVersion, pApiVersion: pointer): integer; stdcall;
+    TPassThruReadVersion: function(DeviceID: longWord; pFirmwareVersion, pDllVersion, pApiVersion: pointer): integer; stdcall;
     // управление вводом и выводом
-    TPassThruIoctl: function(ChannelID: longWord; IoctlID: longWord;
-      pInput: pointer; pOutput: pointer): integer; stdcall;
+    TPassThruIoctl: function(ChannelID: longWord; IoctlID: longWord; pInput: pointer; pOutput: pointer): integer; stdcall;
     // Храним дескриптор DLL
     FDLLHandle: THandle;
     // экземпляр структуры TDIAG_data
@@ -113,22 +109,17 @@ type
     // закрывает шлюз адаптера
     function PassThruClose(): byte;
     // устанавливает соединение с адаптером с аргументами
-    function PassThruConnect(Protocol_id: longWord; flag: longWord;
-      BaudRate: longWord): byte; overload;
+    function PassThruConnect(Protocol_id: longWord; flag: longWord; BaudRate: longWord): byte; overload;
     // устанавливает соединение с адаптером с аргументами по умолчанию
     function PassThruConnect(): byte; overload;
     // разорвать соединение с адаптером
     function PassThruDisconnect(): byte;
     // отправить сообщение в шину
-    function PassThruWriteMsg(Data: array of byte; Tx_Flag: longWord;
-      Timeout: longWord): integer;
+    function PassThruWriteMsg(Data: array of byte; Tx_Flag: longWord; Timeout: longWord): integer;
     // получить сообщение из шины
-    function PassThruReadMsgs(Data: pointer; Size: PLongWord;
-      Timeout: longWord): integer;
+    function PassThruReadMsgs(Data: pointer; Size: PLongWord; Timeout: longWord): integer;
     // установка фильтров сообшений
-    function PassThruStartMsgFilter(Filter_type: longWord;
-      MaskMsg, PatternMsg, FlowControlMsg: array of byte; TxFlags: longWord)
-      : integer; overload;
+    function PassThruStartMsgFilter(Filter_type: longWord; MaskMsg, PatternMsg, FlowControlMsg: array of byte; TxFlags: longWord): integer; overload;
     // установка фильтров сообшений описанных в модуле
     function PassThruStartMsgFilter(): integer; overload;
     // останавливаем фильтр сообщений
@@ -143,7 +134,7 @@ function GetListDll(StringList: pointer): TstringList;
 
 implementation
 
-var
+const
   ERROR_MESS: TERROR_MESS = // Объявление массива ошибок
     ('STATUS_NOERROR', // Функция выполнена успешно
     'ERR_SUCCESS', //
@@ -232,60 +223,68 @@ begin
 end;
 
 constructor TJ2534_v2.Create(DLLPath: string);
+var
+  LastError: DWORD;
 begin
   // обнуляем экземпляры структур
   FillChar(DiagInfo, SizeOf(DiagInfo), 0);
-  // FillChar(PASSTHRU_WRITE_MSG, SizeOf(PASSTHRU_WRITE_MSG), 0);
-  // FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
   FDLLHandle := LoadLibrary(PChar(DLLPath));
 
-  if FDLLHandle = 0 then
-    raise Exception.Create('Не удалось загрузить DLL: ' + DLLPath);
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EInOutError.Create(SysErrorMessage(LastError) + ': ' + DLLPath);
 
   // Проверяем успешность поиска каждой функции
   TPassThruOpen := GetProcAddress(FDLLHandle, 'PassThruOpen');
-  if addr(TPassThruOpen) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruOpen в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruOpen');
 
   TPassThruClose := GetProcAddress(FDLLHandle, 'PassThruClose');
-  if addr(TPassThruClose) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruClose в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruClose');
 
   TPassThruConnect := GetProcAddress(FDLLHandle, 'PassThruConnect');
-  if addr(TPassThruConnect) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruConnect в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruConnect');
 
   TPassThruDisconnect := GetProcAddress(FDLLHandle, 'PassThruDisconnect');
-  if addr(TPassThruDisconnect) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruDisconnect в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruDisconnect');
 
   TPassThruReadMsgs := GetProcAddress(FDLLHandle, 'PassThruReadMsgs');
-  if addr(TPassThruReadMsgs) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruReadMsgs в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruReadMsgs');
 
   TPassThruWriteMsgs := GetProcAddress(FDLLHandle, 'PassThruWriteMsgs');
-  if addr(TPassThruWriteMsgs) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruWriteMsgs в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruWriteMsgs');
 
-  TPassThruStartMsgFilter := GetProcAddress(FDLLHandle,
-    'PassThruStartMsgFilter');
-  if addr(TPassThruStartMsgFilter) = nil then
-    raise Exception.Create
-      ('Не удалось найти функцию PassThruStartMsgFilter в DLL');
+  TPassThruStartMsgFilter := GetProcAddress(FDLLHandle, 'PassThruStartMsgFilter');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruStartMsgFilter');
 
   TPassThruStopMsgFilter := GetProcAddress(FDLLHandle, 'PassThruStopMsgFilter');
-  if addr(TPassThruStopMsgFilter) = nil then
-    raise Exception.Create
-      ('Не удалось найти функцию PassThruStopMsgFilter в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruStopMsgFilter');
 
   TPassThruReadVersion := GetProcAddress(FDLLHandle, 'PassThruReadVersion');
-  if addr(TPassThruReadVersion) = nil then
-    raise Exception.Create
-      ('Не удалось найти функцию PassThruReadVersion в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruReadVersion');
 
   TPassThruIoctl := GetProcAddress(FDLLHandle, 'PassThruIoctl');
-  if addr(TPassThruReadVersion) = nil then
-    raise Exception.Create('Не удалось найти функцию PassThruIoctl в DLL');
+  LastError := GetLastError;
+  if LastError <> ERROR_SUCCESS then
+    raise EExternalException.Create(SysErrorMessage(LastError) + ': PassThruIoctl');
+
 end;
 
 destructor TJ2534_v2.Destroy;
@@ -298,31 +297,25 @@ end;
 
 function TJ2534_v2.PassThruOpen(): byte;
 begin
-  // Вызываем метод PassThruOpen, передавая указатель
   result := TPassThruOpen(nil, @DiagInfo.Device_ID);
 end;
 
 function TJ2534_v2.PassThruClose(): byte;
 begin
-  // Вызываем метод PassThruClose
   result := TPassThruClose(DiagInfo.Device_ID);
 end;
 
-function TJ2534_v2.PassThruConnect(Protocol_id: Cardinal; flag: Cardinal;
-  BaudRate: Cardinal): byte;
+function TJ2534_v2.PassThruConnect(Protocol_id: Cardinal; flag: Cardinal; BaudRate: Cardinal): byte;
 begin
   DiagInfo.ProtocilID := Protocol_id;
   DiagInfo.Flags := flag;
   DiagInfo.BaudRate := BaudRate;
-  // Вызываем метод PassThruConnect
-  result := TPassThruConnect(DiagInfo.Device_ID, DiagInfo.ProtocilID,
-    DiagInfo.Flags, DiagInfo.BaudRate, @DiagInfo.ChannelID);
+  result := TPassThruConnect(DiagInfo.Device_ID, DiagInfo.ProtocilID, DiagInfo.Flags, DiagInfo.BaudRate, @DiagInfo.ChannelID);
 end;
 
 function TJ2534_v2.PassThruConnect(): byte;
 begin
-  result := PassThruConnect(TProtocolID.ISO15765,
-    TFLAGS.CONNECT_FLAGS_CAN_11BIT_ID, TBaudRate.BaudRate);
+  result := PassThruConnect(TProtocolID.ISO15765, TFLAGS.CONNECT_FLAGS_CAN_11BIT_ID, TBaudRate.BaudRate);
 end;
 
 function TJ2534_v2.PassThruDisconnect(): byte;
@@ -330,8 +323,7 @@ begin
   result := self.TPassThruDisconnect(self.DiagInfo.ChannelID);
 end;
 
-function TJ2534_v2.PassThruWriteMsg(Data: array of byte; Tx_Flag: Cardinal;
-  Timeout: Cardinal): integer;
+function TJ2534_v2.PassThruWriteMsg(Data: array of byte; Tx_Flag: Cardinal; Timeout: Cardinal): integer;
 var
   num_msg: integer;
   PASSTHRU_WRITE_MSG: TPASSTHRU_MSG;
@@ -342,12 +334,10 @@ begin
   PASSTHRU_WRITE_MSG.TxFlags := Tx_Flag;
   PASSTHRU_WRITE_MSG.DataSize := length(Data);
   move(Data[0], PASSTHRU_WRITE_MSG.Data[0], length(Data));
-  result := self.TPassThruWriteMsgs(self.DiagInfo.ChannelID,
-    @PASSTHRU_WRITE_MSG, @num_msg, Timeout);
+  result := self.TPassThruWriteMsgs(self.DiagInfo.ChannelID, @PASSTHRU_WRITE_MSG, @num_msg, Timeout);
 end;
 
-function TJ2534_v2.PassThruReadMsgs(Data: pointer; Size: PLongWord;
-  Timeout: Cardinal): integer;
+function TJ2534_v2.PassThruReadMsgs(Data: pointer; Size: PLongWord; Timeout: Cardinal): integer;
 var
   NumMsg: integer;
   count_read: integer;
@@ -357,28 +347,21 @@ begin
   FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
   NumMsg := 1;
   PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
-  result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID, @PASSTHRU_READ_MSG,
-    @NumMsg, Timeout);
+  result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID, @PASSTHRU_READ_MSG, @NumMsg, Timeout);
   count_read := 10;
-  // showmessage(inttostr(NumMsg));
   while (PASSTHRU_READ_MSG.RxStatus <> 0) and (count_read > 0) do
   begin
     NumMsg := 1;
     FillChar(PASSTHRU_READ_MSG, SizeOf(PASSTHRU_READ_MSG), 0);
     PASSTHRU_READ_MSG.ProtocolID := DiagInfo.ProtocilID;
-    result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID,
-      @PASSTHRU_READ_MSG, @NumMsg, Timeout);
-    // showmessage(inttostr(PASSTHRU_READ_MSG.RxStatus));
+    result := self.TPassThruReadMsgs(self.DiagInfo.ChannelID, @PASSTHRU_READ_MSG, @NumMsg, Timeout);
     count_read := count_read - 1;
   end;
-  // showmessage(inttostr(PASSTHRU_READ_MSG.DataSize));
   Size^ := PASSTHRU_READ_MSG.DataSize;
   move(PASSTHRU_READ_MSG.Data[0], Data^, Size^);
 end;
 
-function TJ2534_v2.PassThruStartMsgFilter(Filter_type: longWord;
-  MaskMsg, PatternMsg, FlowControlMsg: array of byte;
-  TxFlags: longWord): integer;
+function TJ2534_v2.PassThruStartMsgFilter(Filter_type: longWord; MaskMsg, PatternMsg, FlowControlMsg: array of byte; TxFlags: longWord): integer;
 { установка фильтра приёма сообщений }
 var
   mask, patter, FC: TPASSTHRU_MSG;
@@ -402,24 +385,20 @@ begin
     patter.Data[i] := PatternMsg[i];
     FC.Data[i] := FlowControlMsg[i];
   end;
-  result := self.TPassThruStartMsgFilter(self.DiagInfo.ChannelID, Filter_type,
-    @mask, @patter, @FC, @DiagInfo.FilterID);
+  result := self.TPassThruStartMsgFilter(self.DiagInfo.ChannelID, Filter_type, @mask, @patter, @FC, @DiagInfo.FilterID);
   ClearRxBufer;
 
 end;
 
 function TJ2534_v2.PassThruStartMsgFilter(): integer;
 begin
-  result := PassThruStartMsgFilter(TFLAGS.FILTER_TYPE_FLOW_CONTROL_FILTER,
-    TFilterMSG.MaskMsg, TFilterMSG.PatternMsg, TFilterMSG.FlowControlMsg,
-    TFLAGS.TRANSMITT_FLAGS_ISO15765_FRAME_PAD);
+  result := PassThruStartMsgFilter(TFLAGS.FILTER_TYPE_FLOW_CONTROL_FILTER, TFilterMSG.MaskMsg, TFilterMSG.PatternMsg, TFilterMSG.FlowControlMsg, TFLAGS.TRANSMITT_FLAGS_ISO15765_FRAME_PAD);
 end;
 
 function TJ2534_v2.PassThruStopMsgFilter(): integer;
 { удаление фильтра приёма сообщений }
 begin
-  result := self.TPassThruStopMsgFilter(self.DiagInfo.ChannelID,
-    self.DiagInfo.FilterID);
+  result := self.TPassThruStopMsgFilter(self.DiagInfo.ChannelID, self.DiagInfo.FilterID);
 end;
 
 { чтение версии }
@@ -431,8 +410,7 @@ var
 begin
   result := TstringList.Create;
   result.Clear;
-  err := self.TPassThruReadVersion(self.DiagInfo.Device_ID, @firm_version,
-    @dll_version, @ApiVersion);
+  err := self.TPassThruReadVersion(self.DiagInfo.Device_ID, @firm_version, @dll_version, @ApiVersion);
   if (err <> 0) and (err < $1B) then
   begin
     result.Add(ERROR_MESS[err]);

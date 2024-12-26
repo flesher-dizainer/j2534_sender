@@ -19,8 +19,8 @@ object MainForm: TMainForm
     Width = 632
     Height = 19
     Panels = <>
-    ExplicitTop = 481
-    ExplicitWidth = 616
+    ExplicitTop = 497
+    ExplicitWidth = 626
   end
   object PageControl1: TPageControl
     Left = 0
@@ -30,8 +30,8 @@ object MainForm: TMainForm
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 1
-    ExplicitWidth = 616
-    ExplicitHeight = 481
+    ExplicitWidth = 626
+    ExplicitHeight = 497
     object TabSheet1: TTabSheet
       Caption = 'Main'
       DesignSize = (
@@ -67,14 +67,17 @@ object MainForm: TMainForm
         ItemHeight = 23
         ParentFont = False
         TabOrder = 2
+        ExplicitHeight = 299
       end
       object Memo1: TMemo
         Left = 215
-        Top = 3
+        Top = 344
         Width = 402
-        Height = 464
+        Height = 123
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 3
+        ExplicitWidth = 396
+        ExplicitHeight = 114
       end
       object ButtonConnect: TButton
         Left = 3
@@ -110,6 +113,7 @@ object MainForm: TMainForm
         Anchors = [akLeft, akBottom]
         Caption = #1057#1090#1072#1088#1090
         TabOrder = 7
+        ExplicitTop = 433
       end
       object ButtonStopDiag: TButton
         Left = 112
@@ -119,6 +123,15 @@ object MainForm: TMainForm
         Anchors = [akLeft, akBottom]
         Caption = #1057#1090#1086#1087
         TabOrder = 8
+        ExplicitTop = 433
+      end
+      object ComboBox1: TComboBox
+        Left = 227
+        Top = 3
+        Width = 206
+        Height = 23
+        Style = csDropDownList
+        TabOrder = 9
       end
     end
     object TabSheet2: TTabSheet
