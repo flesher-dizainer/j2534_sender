@@ -106,6 +106,7 @@ type
     { protected declarations }
   public
     { public declarations }
+    destructor Destroy; override;
     /// <summary >Функция возвращает структуру TDllsInfo. В ней имена адаптеров и пути к DLL</summary >
     function GetNamePathDll: TDllsInfo;
     { Проверяем на наличие функций в dll }
@@ -114,11 +115,21 @@ type
     /// <summary >Открываем шлюз адаптера.</summary >
     /// <param name="aPDeviceID">Указатель для хранения Device ID</param>
     function PassThruOpen(): byte;
+    function PassThruClose(): byte;
+    function PassThruConnect(const aProtocol_id, aFlag, aBaudRate: longWord): byte;
   published
     { published declarations }
   end;
 
 implementation
+
+destructor TJ2534_v2.Destroy;
+begin
+  // Освобождаем DLL, если она была загружена
+  if fDLLHandle <> 0 then
+    FreeLibrary(fDLLHandle);
+  inherited Destroy;
+end;
 
 function TJ2534_v2.GetNamePathDll: TDllsInfo;
 var
@@ -235,7 +246,33 @@ end;
 
 function TJ2534_v2.PassThruOpen(): byte;
 begin
-  Result := TPassThruOpen(nil, @fDiagData.Device_ID);
+  Result := $FF;
+  if Assigned(TPassThruOpen) then
+    Result := TPassThruOpen(nil, @fDiagData.Device_ID)
+  else
+    raise EExternalException.Create('Function PassThruOpen not found');
+end;
+
+function TJ2534_v2.PassThruClose(): byte;
+begin
+  Result := $FF;
+  if Assigned(TPassThruClose) then
+    Result := TPassThruClose(fDiagData.Device_ID)
+  else
+    raise EExternalException.Create('Function PassThruClose not found');
+end;
+
+function TJ2534_v2.PassThruConnect(const aProtocol_id, aFlag, aBaudRate: longWord): byte;
+begin
+  if Assigned(TPassThruConnect) then
+  begin
+    fDiagData.ProtocilID := aProtocol_id;
+    fDiagData.Flags := aFlag;
+    fDiagData.BaudRate := aBaudRate;
+    Result := TPassThruConnect(fDiagData.Device_ID, fDiagData.ProtocilID, fDiagData.Flags, fDiagData.BaudRate, @fDiagData.ChannelID);
+  end
+  else
+    raise EExternalException.Create('Function PassThruConnect not found');
 end;
 
 end.
