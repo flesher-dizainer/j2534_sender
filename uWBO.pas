@@ -1,43 +1,54 @@
-﻿unit uWBO;
+unit uWBO;
 
 interface
 
 uses
-  System.Classes, System.SysUtils, System.Threading;
+  System.Classes, System.SysUtils;
 
 type
-  TuWBO = class(TThread)
+  TWbo = class(TThread)
   private
-    FStopped: boolean;
-    number_sensor: byte;
+    fStopped: boolean;
+    fNumberSensor: Integer;
+
+  const
+    FWboArray: array [0 .. 1] of string = ('AEM', 'LC1/2');
   public
-    constructor Create(CreateSuspended: boolean; number_sensor: byte);
     destructor Destroy; override;
     procedure Execute; override;
+    function GetListWbo(): TStrings;
+    procedure SetNumberSensor(const aValue: Integer);
   end;
 
 implementation
 
-constructor TuWBO.Create(CreateSuspended: boolean; number_sensor: byte);
+destructor TWbo.Destroy;
 begin
-  inherited Create(CreateSuspended);
-  self.number_sensor := number_sensor;
-  FStopped := False;
-end;
-
-destructor TuWBO.Destroy;
-begin
-  FStopped := True;
+  fStopped := True;
   inherited Destroy;
 end;
 
-procedure TuWBO.Execute;
+procedure TWbo.Execute;
 begin
-  while not FStopped do
+  while not fStopped do
   begin
     // Тело цикла потока
     sleep(1);
   end;
+end;
+
+function TWbo.GetListWbo(): TStrings;
+var
+  i: Integer;
+begin
+  Result := TStringList.Create;
+  for i := Low(FWboArray) to High(FWboArray) do
+    Result.Add(FWboArray[i]);
+end;
+
+procedure TWbo.SetNumberSensor(const aValue: Integer);
+begin
+  fNumberSensor := aValue;
 end;
 
 end.
