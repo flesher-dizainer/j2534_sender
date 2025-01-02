@@ -28,10 +28,6 @@ type
     fBaudRatePort: Integer; // скорость порта
     fMsgWbo: String;
 
-  const
-    FWboArray: array [0 .. 2] of String = ('LC1/2', 'AEM 9600', 'AEM 19200');
-    fBaudRate: array [0 .. 2] of Integer = (19200, 9600, 19200);
-
   protected
     function OpenComPort(const aComPort: string; const aBaudRate: Integer): Boolean;
     procedure CloseComPort(); // Добавляем метод для закрытия COM-порта
@@ -61,6 +57,10 @@ type
   end;
 
 implementation
+
+const
+  FWboArray: array [0 .. 2] of String = ('LC1/2', 'AEM 9600', 'AEM 19200');
+  fBaudRate: array [0 .. 2] of Integer = (19200, 9600, 19200);
 
 destructor TWbo.Destroy;
 begin
