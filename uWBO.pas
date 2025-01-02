@@ -2,6 +2,11 @@ unit uWBO;
 
 {
   Модуль приёма данных с ШДК.
+  Использование:
+  1. wbo := TWbo.create;
+  2. StringListComPort:=wbo.GetListWbo();
+  3. StringListTypeWbo:=wbo.GetListPorts();
+  4. wbo.Start(Номер выбранного ШДК(StringListComPort), Название Com порта(StringListTypeWbo) например (COM1));
 }
 
 interface
@@ -28,29 +33,30 @@ type
     fBaudRate: array [0 .. 2] of Integer = (19200, 9600, 19200);
 
   protected
+    function OpenComPort(const aComPort: string; const aBaudRate: Integer): Boolean;
     procedure CloseComPort(); // Добавляем метод для закрытия COM-порта
     function ReOpenPort(): Boolean;
-    function Repack_AEM_9600(aData: array of byte): Boolean;
-    function Repack_AEM_19200(aData: array of byte): Boolean;
+    function Repack_AEM_9600(aData: TBytes): Boolean;
+    function Repack_AEM_19200(aData: TBytes): Boolean;
     function Repack_LC(const aData: TBytes): Boolean;
-    procedure GenfAFR(const data: TBytes);
+    procedure GenfAFR(const data: TBytes); // разбор данных LC1/2
+    function GetLambda(): Real;
   public
     destructor Destroy; override;
     procedure Execute; override;
     /// <summary>Запрос поддерживаемых WBO</summary>
     function GetListWbo(): TStrings;
-    /// <summary>Установка номера используемого WBO</summary>
-    procedure SetNumberSensor(const aValue: Integer);
     /// <summary>Получить состав смеси</summary>
     property AFR: Real read fAFR write fAFR;
     /// <summary>Установить наличие обновлённых данных</summary>
     property NewData: Boolean read fNewData write fNewData;
     property MessageWbo: string read fMsgWbo;
+    property Lambda: Real read GetLambda;
     /// <summary>Запуск приёма данных с ШДК в потоке</summary>
     /// <param name="aNumberSensor">Номер выбранного типа ШДК</param>
     /// <param name="aNamePort">Название COM порта, например COM1</param>
     procedure Start(const aNumberSensor: Integer; const aNamePort: string);
-    function OpenComPort(const aComPort: string; const aBaudRate: Integer): Boolean;
+    // получаем список доступных ComPorts
     function GetListPorts(): TStrings;
   end;
 
@@ -106,15 +112,28 @@ begin
           // если не синхронизированы, то пытаемся найти начало данных
           if not lFlagSynchronized then
           begin
-            ReadFile(hCOMPort, lSynchroByte, 1, NumberOfBytesReaded, nil);
+            if fNumberSensor <> 0 then
+              ReadFile(hCOMPort, lSynchroByte, 1, NumberOfBytesReaded, nil);
+            fMsgWbo := 'Search synchro byte : ' + IntToHex(lSynchroByte, 2);
             case fNumberSensor of
               0:
                 begin
                   // lc1/2  $00
-                  if lSynchroByte = 0 then
+                  if lSizeData >= 2 then
                   begin
-                    lFlagSynchronized := True;
-                    lSizePackSynchro := 6;
+                    ReadFile(hCOMPort, lSynchroByte, 1, NumberOfBytesReaded, nil);
+                    if lSynchroByte and $A2 = $A2 then
+                    begin
+                      ReadFile(hCOMPort, lSynchroByte, 1, NumberOfBytesReaded, nil);
+                      if lSynchroByte and $80 = $80 then
+                      begin
+                        fMsgWbo := 'Search synchro OK ';
+                        lFlagSynchronized := True;
+                        lSizePackSynchro := 6;
+                      end;
+
+                    end;
+
                   end;
 
                 end;
@@ -168,9 +187,11 @@ begin
 
         end;
 
-      end else begin
-         lFlagSynchronized := False;
-         self.ReOpenPort;
+      end
+      else
+      begin
+        lFlagSynchronized := False;
+        self.ReOpenPort;
       end;
     end;
   end;
@@ -183,11 +204,6 @@ begin
   result := TStringList.Create;
   for i := Low(FWboArray) to High(FWboArray) do
     result.Add(FWboArray[i]);
-end;
-
-procedure TWbo.SetNumberSensor(const aValue: Integer);
-begin
-  fNumberSensor := aValue;
 end;
 
 procedure TWbo.Start(const aNumberSensor: Integer; const aNamePort: string);
@@ -206,7 +222,8 @@ var
   DCB: TDCB;
 begin
   result := False;
-  hCOMPort := CreateFile(PChar(aComPort), GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, FILE_FLAG_WRITE_THROUGH, 0);
+  if hCOMPort = INVALID_HANDLE_VALUE then
+    hCOMPort := CreateFile(PChar(aComPort), GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, FILE_FLAG_WRITE_THROUGH, 0);
   if hCOMPort <> INVALID_HANDLE_VALUE then
   begin
     GetCommState(hCOMPort, DCB);
@@ -248,22 +265,64 @@ begin
   end;
 end;
 
-function TWbo.Repack_AEM_9600(aData: array of byte): Boolean;
+function StrToFloatD(value: string): Real;
 begin
+  try
+    value := StringReplace(value, '.', ',', [rfReplaceAll, rfIgnoreCase]);
+    result := StrToFloat(value);
+  except
+    value := StringReplace(value, ',', '.', [rfReplaceAll, rfIgnoreCase]);
+    result := StrToFloat(value);
+  end;
+end;
+
+function TWbo.Repack_AEM_9600(aData: TBytes): Boolean;
+var
+  lStrAFR: string;
+  i: Integer;
+begin
+  lStrAFR := '';
+  for i := Low(aData) to High(aData) do
+    if ((aData[i] >= $30) and (aData[i] <= $39)) or (aData[i] = $2E) then
+      lStrAFR := lStrAFR + Char(aData[i]);
+  fAFR := StrToFloatD(lStrAFR);
+  self.fNewData := True;
   result := aData[high(aData)] = $0A;
 end;
 
-function TWbo.Repack_AEM_19200(aData: array of byte): Boolean;
+function TWbo.Repack_AEM_19200(aData: TBytes): Boolean;
+var
+  lMessage: string;
+  lStrAFR: string;
+  i: Integer;
+  lStrungList: TStringList;
 begin
+  lMessage := '';
   result := aData[high(aData)] = $0D;
+  for i := Low(aData) to High(aData) do
+    lMessage := lMessage + Char(aData[i]);
+  lStrungList := TStringList.Create;
+  lStrungList.Delimiter := Char($9);
+  lStrungList.DelimitedText := lMessage;
+  if lStrungList.Count > 0 then
+  begin
+    self.fNewData := True;
+    self.fAFR := StrToFloatD(lStrungList[0]) * 14.7;
+    if lStrungList.Count > 1 then
+      self.fMsgWbo := lStrungList[1];
+    if lStrungList.Count > 2 then
+      self.fMsgWbo := fMsgWbo + ' ' + lStrungList[2];
+  end;
+
+  lStrungList.Free;
 end;
 
 function TWbo.Repack_LC(const aData: TBytes): Boolean;
 begin
-  if (aData[high(aData)] = $00) and ((aData[0] and $80) = $80) then
+  if ((aData[high(aData)] and $80 = $80) and (aData[high(aData) - 1] and $A2 = $A2)) then
   begin
     GenfAFR(aData);
-    result := aData[high(aData)] = $00;
+    result := True;
   end
   else
     result := False;
@@ -281,17 +340,17 @@ const
   Reserver = 7;
 var
   State: byte;
-  AF, Lambda, O2Lvl, WarmUp: Real;
+  Lambda, O2Lvl, WarmUp: Real;
   ERRCode: Integer;
 begin
   State := (data[0] shr 2) and $07;
   case State of
     LambdaValue:
       begin
-        //AF := (((data[0] and 1) shl 7) + (data[1] and $7F)) / 10;
+        // AF := (((data[0] and 1) shl 7) + (data[1] and $7F)) / 10;
         Lambda := (((data[2] and $7F) shl 7) + (data[3] and $7F) + 500) / 1000;
         fAFR := StrToFloat(FormatFloat('##0.##', Lambda * 14.7));
-        //stochiometric := AF;
+        // stochiometric := AF;
 
         fMsgWbo := 'fAFR: ' + floattostr(fAFR);
         fNewData := True;
@@ -318,6 +377,11 @@ begin
         fNewData := False;
       end;
   end;
+end;
+
+function TWbo.GetLambda(): Real;
+begin
+  result := fAFR / 14.7;
 end;
 
 end.
