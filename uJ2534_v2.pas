@@ -13,30 +13,6 @@ uses
   System.TypInfo;
 
 type
-  TERROR_MESS = (STATUS_NOERROR, ERR_SUCCESS, ERR_NOT_SUPPORTED, ERR_INVALID_CHANNEL_ID, ERR_NULL_PARAMETER, ERR_INVALID_IOCTL_VALUE,
-    ERR_INVALID_FLAGS, ERR_FAILED, ERR_DEVICE_NOT_CONNECTED, ERR_TIMEOUT, ERR_INVALID_MSG, ERR_INVALID_TIME_INTERVAL, ERR_EXCEEDED_LIMIT,
-    ERR_INVALID_MSG_ID, ERR_DEVICE_IN_USE, ERR_INVALID_IOCTL_ID, ERR_BUFFER_EMPTY, ERR_BUFFER_FULL, ERR_BUFFER_OVERFLOW, ERR_PIN_INVALID,
-    ERR_CHANNEL_IN_USE, ERR_MSG_PROTOCOL_ID, ERR_INVALID_FILTER_ID, ERR_NO_FLOW_CONTROL, ERR_NOT_UNIQUE, ERR_INVALID_BAUDRATE,
-    ERR_INVALID_DEVICE_ID);
-
-const
-  TERROR_CMT: array [TERROR_MESS] of string = (' Функция выполнена успешно ', 'Информация отсутствует ',
-    ' Адаптер не поддерживает запрошенные параметры.', ' Задан не существующий идентификатор канала ChannelID.',
-    ' не Задан указатель на буфер приёмных пакетов pMsg.', ' не правильно Задан значение Ioctl параметра.', ' Задан не существующий флаг ',
-    ' Определён стандартом J2534.В адаптере, для этой функции не используется.', ' Нет соединения с адаптером.',
-    ' За заданное время пришло меньше сообщений чем заказали.', ' не правильная структура сообщения заданная В указателе pMsg ',
-    ' не правильно Задан интервал выдачи сообщений ', ' Превышено количество установленных фильтров.',
-    ' Задан не существующий идентификатор адаптера DeviceID ',
-    ' Прибор уже используется программой.Возможные причины: не была выполнена Функция PassThruClose В предыдущей сессии.',
-    ' Задан не существующий идентификатор канала IoctlID ', ' Приёмная очередь пустая.', ' очередь передачи переполнена.',
-    ' Показывает что Приёмная очередь была переполнена и сообщения были потеряны.Реальное количество принятых сообщений будет находится В NumMsgs.',
-    ' не правильно Задан вывод коммутатора.', ' Канал уже используется.Определён стандартом J2534.',
-    ' Протокол заданный В параметрах передаваемого сообщения не совпадает с протоколом заданным В ChannelID ',
-    ' Задан не существующий идентификатор фильтра FilterID ', ' для протокола ISO15765 не установлен фильтр для Flow Control.',
-    ' CAN ID В pPatternMsg или pFlowControlMsg соответствует какому либо ID В уже существующем FLOW_CONTROL_FILTER ',
-    ' Задана не правильная скорость обмена ', ' Задан не существующий идентификатор адаптера DeviceID ');
-
-type
   /// <summary >Указатель на массив байт</summary >
   PTBytes = ^TBytes;
 
@@ -111,8 +87,7 @@ type
     // закрыть шлюз связи с адаптером
     FTPassThruClose: function(DeviceID: longWord): byte; stdcall;
     // Установка соединения по протоколу
-    FTPassThruConnect: function(DeviceID: longWord; ProtocolID: longWord; Flags: longWord; BaudRate: longWord; pChannelID: PLongWord)
-      : integer; stdcall;
+    FTPassThruConnect: function(DeviceID: longWord; ProtocolID: longWord; Flags: longWord; BaudRate: longWord; pChannelID: PLongWord): integer; stdcall;
     // разьединение связи
     FTPassThruDisconnect: function(DeviceID: longWord): byte; stdcall;
     // отправка сообщения адаптеру
@@ -120,8 +95,7 @@ type
     // Чтение принятого пакета  ChannelID - идентификатор канала
     FTPassThruReadMsgs: function(ChannelID: longWord; aPPassthruMsg: PPassthruMsg; pNumMsgs: Pint; Timeout: longWord): integer; stdcall;
     // установка фильтра сообщения
-    FTPassThruStartMsgFilter: function(ChannelID: longWord; FilterType: longWord; pMaskMsg: pointer; pPatternMsg: pointer;
-      pFlowControlMsg: pointer; FilterID: pointer): integer; stdcall;
+    FTPassThruStartMsgFilter: function(ChannelID: longWord; FilterType: longWord; pMaskMsg: pointer; pPatternMsg: pointer; pFlowControlMsg: pointer; FilterID: pointer): integer; stdcall;
     // удаление фильтров сообщений
     FTPassThruStopMsgFilter: function(ChannelID: longWord; FilterID: longWord): integer; stdcall;
     // чтение версии прошивки, длл, api
@@ -136,6 +110,9 @@ type
   protected
     { protected declarations }
   public
+    FProtocol_id: TProtocolID;
+    FFlags: TFlags;
+    FBaudRate: TBaudRate;
     { public declarations }
     destructor Destroy; override;
     /// <summary >Функция возвращает структуру TDllsInfo. В ней имена адаптеров и пути к DLL</summary >
@@ -147,7 +124,8 @@ type
     function PassThruOpen(): byte;
     /// <summary >Закрываем шлюз адаптера.</summary >
     function PassThruClose(): byte;
-    function PassThruConnect(const aProtocol_id, aFlag, aBaudRate: longWord): byte;
+    function PassThruConnect(const aProtocol_id, aFlag, aBaudRate: longWord): integer; Overload;
+    function PassThruConnect(): integer; Overload;
     // разорвать соединение с адаптером
     function PassThruDisconnect(): byte;
     // отправить сообщение в шину
@@ -155,21 +133,35 @@ type
     // получить сообщение из шины
     function PassThruReadMsgs(aData: PTBytes; aSize: PLongWord; aTimeout: longWord): integer;
     // установка фильтров сообшений
-    function PassThruStartMsgFilter(aFilter_type: longWord; aMaskMsg, aPatternMsg, aFlowControlMsg: TBytes; aTxFlags: longWord): integer;
+    function PassThruStartMsgFilter(aFilter_type: longWord; aMaskMsg, aPatternMsg, aFlowControlMsg: TBytes; aTxFlags: longWord): integer; Overload;
+    function PassThruStartMsgFilter(): integer; Overload;
     // останавливаем фильтр сообщений
     function PassThruStopMsgFilter(): integer;
     // чтение версии DLL
     // function PassThrueReadVersion(): integer;
-    function GetComment(error: TERROR_MESS): string;
+    function GetErrorDescriptions(error: integer): string;
     // published
     { published declarations }
   end;
 
 implementation
 
+const
+  TERROR_CMT: array [0 .. $1A] of string = (' Функция выполнена успешно ', 'Информация отсутствует ', ' Адаптер не поддерживает запрошенные параметры.',
+    ' Задан не существующий идентификатор канала ChannelID.', ' не Задан указатель на буфер приёмных пакетов pMsg.', ' не правильно Задан значение Ioctl параметра.', ' Задан не существующий флаг ',
+    ' Определён стандартом J2534.В адаптере, для этой функции не используется.', ' Нет соединения с адаптером.', ' За заданное время пришло меньше сообщений чем заказали.',
+    ' не правильная структура сообщения заданная В указателе pMsg ', ' не правильно Задан интервал выдачи сообщений ', ' Превышено количество установленных фильтров.',
+    ' Задан не существующий идентификатор адаптера DeviceID ', ' Прибор уже используется программой.Возможные причины: не была выполнена Функция PassThruClose В предыдущей сессии.',
+    ' Задан не существующий идентификатор канала IoctlID ', ' Приёмная очередь пустая.', ' очередь передачи переполнена.',
+    ' Показывает что Приёмная очередь была переполнена и сообщения были потеряны.Реальное количество принятых сообщений будет находится В NumMsgs.', ' не правильно Задан вывод коммутатора.',
+    ' Канал уже используется.Определён стандартом J2534.', ' Протокол заданный В параметрах передаваемого сообщения не совпадает с протоколом заданным В ChannelID ',
+    ' Задан не существующий идентификатор фильтра FilterID ', ' для протокола ISO15765 не установлен фильтр для Flow Control.',
+    ' CAN ID В pPatternMsg или pFlowControlMsg соответствует какому либо ID В уже существующем FLOW_CONTROL_FILTER ', ' Задана не правильная скорость обмена ',
+    ' Задан не существующий идентификатор адаптера DeviceID ');
+
 type
-  TEFuncNames = (PassThruOpen, PassThruClose, PassThruConnect, PassThruDisconnect, PassThruReadMsgs, PassThruWriteMsgs,
-    PassThruStartMsgFilter, PassThruStopMsgFilter, PassThruReadVersion, PassThruIoctl);
+  TEFuncNames = (PassThruOpen, PassThruClose, PassThruConnect, PassThruDisconnect, PassThruReadMsgs, PassThruWriteMsgs, PassThruStartMsgFilter, PassThruStopMsgFilter, PassThruReadVersion,
+    PassThruIoctl);
 
 destructor TJ2534_v2.Destroy;
 begin
@@ -297,12 +289,21 @@ begin
   Result := FTPassThruClose(fDiagData.Device_ID)
 end;
 
-function TJ2534_v2.PassThruConnect(const aProtocol_id, aFlag, aBaudRate: longWord): byte;
+function TJ2534_v2.PassThruConnect(const aProtocol_id, aFlag, aBaudRate: longWord): integer;
 begin
   fDiagData.ProtocilID := aProtocol_id;
   fDiagData.Flags := aFlag;
   fDiagData.BaudRate := aBaudRate;
   Result := FTPassThruConnect(fDiagData.Device_ID, fDiagData.ProtocilID, fDiagData.Flags, fDiagData.BaudRate, @fDiagData.ChannelID);
+end;
+
+function TJ2534_v2.PassThruConnect: integer;
+begin
+  fDiagData.ProtocilID := self.FProtocol_id.ISO15765;
+  fDiagData.Flags := self.FFlags.CONNECT_FLAGS_CAN_11BIT_ID;
+  fDiagData.BaudRate := self.FBaudRate.BaudRate;
+  Result := FTPassThruConnect(fDiagData.Device_ID, fDiagData.ProtocilID, fDiagData.Flags, fDiagData.BaudRate, @fDiagData.ChannelID);
+
 end;
 
 function TJ2534_v2.PassThruDisconnect(): byte;
@@ -343,8 +344,7 @@ begin
   move(lPassthruMsg.Data[0], aData^, aSize^);
 end;
 
-function TJ2534_v2.PassThruStartMsgFilter(aFilter_type: longWord; aMaskMsg, aPatternMsg, aFlowControlMsg: TBytes;
-  aTxFlags: longWord): integer;
+function TJ2534_v2.PassThruStartMsgFilter(aFilter_type: longWord; aMaskMsg, aPatternMsg, aFlowControlMsg: TBytes; aTxFlags: longWord): integer;
 var
   lMaskMsg, lPatternMsg, laFlowControlMsg: TPassthruMsg;
   i: integer;
@@ -367,10 +367,35 @@ begin
     lPatternMsg.Data[i] := aPatternMsg[i];
     laFlowControlMsg.Data[i] := aFlowControlMsg[i];
   end;
-  Result := self.FTPassThruStartMsgFilter(self.fDiagData.ChannelID, aFilter_type, @lMaskMsg, @lPatternMsg, @laFlowControlMsg,
-    @fDiagData.FilterID);
+  Result := self.FTPassThruStartMsgFilter(self.fDiagData.ChannelID, aFilter_type, @lMaskMsg, @lPatternMsg, @laFlowControlMsg, @fDiagData.FilterID);
   ClearRxBufer;
+end;
 
+function TJ2534_v2.PassThruStartMsgFilter(): integer;
+var
+  lMaskMsg, lPatternMsg, laFlowControlMsg: TPassthruMsg;
+  i: integer;
+begin
+  FillChar(lMaskMsg, SizeOf(lMaskMsg), 0);
+  FillChar(lPatternMsg, SizeOf(lPatternMsg), 0);
+  FillChar(laFlowControlMsg, SizeOf(laFlowControlMsg), 0);
+  lMaskMsg.TxFlags := self.FFlags.FILTER_TYPE_FLOW_CONTROL_FILTER;
+  lPatternMsg.TxFlags := self.FFlags.FILTER_TYPE_FLOW_CONTROL_FILTER;
+  laFlowControlMsg.TxFlags := self.FFlags.FILTER_TYPE_FLOW_CONTROL_FILTER;
+  lMaskMsg.ProtocolID := fDiagData.ProtocilID;
+  lPatternMsg.ProtocolID := fDiagData.ProtocilID;
+  laFlowControlMsg.ProtocolID := fDiagData.ProtocilID;
+  lMaskMsg.DataSize := 4;
+  lPatternMsg.DataSize := 4;
+  laFlowControlMsg.DataSize := 4;
+  for i := 0 to 3 do
+  begin
+    lMaskMsg.Data[i] := TFilterMSG.MaskMsg[i];
+    lPatternMsg.Data[i] := TFilterMSG.PatternMsg[i];
+    laFlowControlMsg.Data[i] := TFilterMSG.FlowControlMsg[i];
+  end;
+  Result := self.FTPassThruStartMsgFilter(self.fDiagData.ChannelID, self.FFlags.FILTER_TYPE_FLOW_CONTROL_FILTER, @lMaskMsg, @lPatternMsg, @laFlowControlMsg, @fDiagData.FilterID);
+  ClearRxBufer;
 end;
 
 function TJ2534_v2.PassThruStopMsgFilter(): integer;
@@ -384,9 +409,12 @@ begin
   Result := self.FTPassThruIoctl(self.fDiagData.ChannelID, $08, nil, nil);
 end;
 
-function TJ2534_v2.GetComment(error: TERROR_MESS): string;
+function TJ2534_v2.GetErrorDescriptions(error: integer): string;
 begin
-  Result := TERROR_CMT[error];
+  if error <= HIGH(TERROR_CMT) then
+    Result := TERROR_CMT[error]
+  else
+    Result := 'Index error out of range';
 end;
 
 end.
