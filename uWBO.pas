@@ -1,21 +1,4 @@
-unit uWBO;
-
-{
-  Модуль приёма данных с ШДК.
-  Использование:
-  1. wbo := TWbo.create;
-  2. StringListComPort:=wbo.GetListWbo();
-  3. StringListTypeWbo:=wbo.GetListPorts();
-  4. wbo.Start(Номер выбранного ШДК(StringListComPort), Название Com порта(StringListTypeWbo) например (COM1));
-  //wbo.NewData - флаг обновленных данных
-  //Работа в потоке или в таймере
-  if wbo.NewData then begin
-    WboAfr := wbo.AFR;
-    WboLambda := wbo.Lambda;
-    wbo.NewData := False;
-  end;
-}
-
+﻿unit uWBO;
 {
   Модуль приёма данных с ШДК.
   Использование:
