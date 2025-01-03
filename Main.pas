@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls, uDiag,
-  uJ2534_v2, uWBO, Vcl.CheckLst;
+  uJ2534_v2, uWBO, Vcl.CheckLst, Vcl.ExtCtrls;
 
 type
   TMainForm = class(TForm)
@@ -23,23 +23,29 @@ type
     ButtonSetDiag: TButton;
     ButtonStartDiag: TButton;
     ButtonStopDiag: TButton;
-    ComboBox1: TComboBox;
+    CBWbo: TComboBox;
+    Button2: TButton;
+    CBPortWbo: TComboBox;
+    Timer1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ButtonConnectClick(Sender: TObject);
     procedure ButtonSetDiagClick(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Private declarations }
     StringListDll: TstringList;
     J2534: TJ2534_v2;
     Diag: TDiag;
-    Wbo: TuWBO;
+    Wbo: TWbo;
     procedure create_class_j2534;
     procedure check_adapter_j2534;
     procedure create_diag_class;
     procedure create_class_wbo;
     procedure get_list_param;
     procedure StartDiag;
+    function StrToFloatD(s: string): real; overload;
   public
     { Public declarations }
   end;
@@ -51,41 +57,61 @@ implementation
 
 {$R *.dfm}
 
+function TMainForm.StrToFloatD(s: string): real;
+begin
+  try
+    s := StringReplace(s, '.', ',', [rfReplaceAll, rfIgnoreCase]);
+    Result := StrToFloat(s);
+  except
+    s := StringReplace(s, ',', '.', [rfReplaceAll, rfIgnoreCase]);
+    Result := StrToFloat(s);
+  end;
+end;
+
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FreeAndNil(StringListDll);
+  if Assigned(StringListDll) then
+    FreeAndNil(StringListDll);
 
-  if Diag <> nil then
+  if Assigned(Diag) then
   begin
     Diag.Stop;
     Diag.Free;
   end;
 
-  if J2534 <> nil then
-  begin
+  if Assigned(J2534) then
     FreeAndNil(J2534);
-  end;
 
-  if Wbo <> nil then
-  begin
+  if Assigned(Wbo) then
     FreeAndNil(Wbo);
-  end;
+
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  StringListDll := uJ2534_v2.GetListDll(@ComboBoxDll.Items);
-  if StringListDll.Count > 0 then
-    ComboBoxDll.ItemIndex := 0;
-  J2534 := nil;
+  create_class_j2534;
+  create_diag_class;
+  create_class_wbo;
 end;
 
 procedure TMainForm.create_class_j2534;
+var
+  lListDlls: TDllsInfo;
 begin
-  if J2534 = nil then
-    if StringListDll.Count > 0 then
-      J2534 := TJ2534_v2.Create(StringListDll[ComboBoxDll.ItemIndex]);
-  create_diag_class;
+  if not Assigned(J2534) then
+    J2534 := TJ2534_v2.Create;
+  ComboBoxDll.Items.Clear;
+  lListDlls := J2534.GetNamePathDll;
+  ComboBoxDll.Items := lListDlls.NamesAdapter;
+  ComboBoxDll.ItemIndex := 0;
+  StringListDll := TstringList.Create;
+  StringListDll.AddStrings(lListDlls.PathsDll);
+end;
+
+procedure TMainForm.Button2Click(Sender: TObject);
+begin
+  Wbo.Start(CBWbo.ItemIndex, self.CBPortWbo.Text);
+  Timer1.Enabled := True;
 end;
 
 procedure TMainForm.ButtonConnectClick(Sender: TObject);
@@ -109,10 +135,8 @@ begin
   begin
     err_number := J2534.PassThruOpen;
     error_description := J2534.GetErrorDescriptions(err_number);
-    Memo1.Lines.Add('Open adapter = ' + error_description);
-    Memo1.Lines.AddStrings(J2534.PassThrueReadVersion);
 
-    err_number := J2534.PassThruConnect;
+    err_number := J2534.PassThruConnect();
     error_description := J2534.GetErrorDescriptions(err_number);
     Memo1.Lines.Add('Connect = ' + error_description);
 
@@ -151,10 +175,14 @@ end;
 
 procedure TMainForm.create_class_wbo;
 begin
-  if Wbo = nil then
-  begin
-    Wbo := TuWBO.Create(True, 1);
-  end;
+  if not Assigned(Wbo) then
+    Wbo := TWbo.Create();
+  CBWbo.Items := Wbo.GetListWbo;
+  if CBWbo.Items.Count > 0 then
+    CBWbo.ItemIndex := 0;
+  CBPortWbo.Items := Wbo.GetListPorts;
+  if CBPortWbo.Items.Count > 0 then
+    CBPortWbo.ItemIndex := 0;
 end;
 
 procedure TMainForm.get_list_param;
@@ -180,6 +208,22 @@ end;
 procedure TMainForm.StartDiag;
 begin
   Diag.Start();
+end;
+
+procedure TMainForm.Timer1Timer(Sender: TObject);
+begin
+  if Assigned(Wbo) then
+  begin
+    // if Wbo.NewData then
+    StatusBar1.Panels[0].Text := FloatToStr(Wbo.AFR);
+    StatusBar1.Panels[1].Text := FloatToStr(Wbo.Lambda);
+    StatusBar1.Panels[2].Text := Wbo.MessageWbo;
+    if Wbo.NewData then
+    begin
+      Memo1.Lines.Add(format('message : %s , AFR : %g', [Wbo.MessageWbo, Wbo.AFR]));
+      Wbo.NewData := False;
+    end;
+  end;
 end;
 
 end.

@@ -18,7 +18,19 @@ object MainForm: TMainForm
     Top = 506
     Width = 632
     Height = 19
-    Panels = <>
+    Panels = <
+      item
+        Text = '123'
+        Width = 50
+      end
+      item
+        Text = 'Lambda'
+        Width = 100
+      end
+      item
+        Text = 'Msg Wbo'
+        Width = 200
+      end>
     ExplicitTop = 497
     ExplicitWidth = 626
   end
@@ -71,13 +83,13 @@ object MainForm: TMainForm
       end
       object Memo1: TMemo
         Left = 215
-        Top = 344
-        Width = 402
-        Height = 123
+        Top = 125
+        Width = 396
+        Height = 342
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 3
-        ExplicitWidth = 396
-        ExplicitHeight = 114
+        ExplicitWidth = 390
+        ExplicitHeight = 333
       end
       object ButtonConnect: TButton
         Left = 3
@@ -125,7 +137,7 @@ object MainForm: TMainForm
         TabOrder = 8
         ExplicitTop = 433
       end
-      object ComboBox1: TComboBox
+      object CBWbo: TComboBox
         Left = 227
         Top = 3
         Width = 206
@@ -133,10 +145,38 @@ object MainForm: TMainForm
         Style = csDropDownList
         TabOrder = 9
       end
+      object Button2: TButton
+        Left = 227
+        Top = 32
+        Width = 75
+        Height = 25
+        Caption = #1042#1082#1083' '#1064#1044#1050
+        TabOrder = 10
+        OnClick = Button2Click
+      end
+      object CBPortWbo: TComboBox
+        Left = 439
+        Top = 3
+        Width = 145
+        Height = 23
+        Style = csDropDownList
+        ItemIndex = 0
+        TabOrder = 11
+        Text = 'No Com Ports'
+        Items.Strings = (
+          'No Com Ports')
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Data'
       ImageIndex = 1
     end
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 1
+    OnTimer = Timer1Timer
+    Left = 404
+    Top = 178
   end
 end

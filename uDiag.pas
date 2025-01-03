@@ -356,9 +356,9 @@ function TDiag.Stop;
 begin
   self.RunThread := False;
   self.WaitFor;
-  J2534_ex.PassThruDisconnect;
-  J2534_ex.PassThruClose;
-  Result := True;
+  //J2534_ex.PassThruDisconnect;
+  //J2534_ex.PassThruClose;
+  //Result := True;
 end;
 
 end.
