@@ -5,7 +5,8 @@ uses
   Main in 'Main.pas' {MainForm},
   uDiag in 'uDiag.pas',
   uJ2534_v2 in 'uJ2534_v2.pas',
-  uWBO in 'uWBO.pas';
+  uWBO in 'uWBO.pas',
+  uJsonData in 'uJsonData.pas';
 
 {$R *.res}
 

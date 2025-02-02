@@ -166,6 +166,15 @@ object MainForm: TMainForm
         Items.Strings = (
           'No Com Ports')
       end
+      object Button3: TButton
+        Left = 320
+        Top = 32
+        Width = 75
+        Height = 25
+        Caption = 'Json'
+        TabOrder = 12
+        OnClick = Button3Click
+      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Data'

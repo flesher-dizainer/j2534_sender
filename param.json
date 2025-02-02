@@ -1,0 +1,271 @@
+{
+	"data":[
+		{
+		  "name": "M86AvtoVaz",
+		  "request_bytes": "07E0220001",
+		  "structures": [
+			{
+			  "name": "ERRORS",
+			  "offset": "0",
+			  "storagetype": "uint8",
+			  "mul": "1",
+			  "div": "1",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "UBAT",
+			  "offset": "1",
+			  "storagetype": "uint8",
+			  "mul": "1",
+			  "div": "10",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "TWAT",
+			  "offset": "2",
+			  "storagetype": "uint16",
+			  "mul": "0.75",
+			  "div": "1",
+			  "subb": "48",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "RPM",
+			  "offset": "4",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "4",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "VSPD",
+			  "offset": "6",
+			  "storagetype": "uint8",
+			  "mul": "1.25",
+			  "div": "1",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "UOZ",
+			  "offset": "7",
+			  "storagetype": "int8",
+			  "mul": "0.75",
+			  "div": "1",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "InjTime",
+			  "offset": "8",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "1250",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "THR",
+			  "offset": "10",
+			  "storagetype": "uint16",
+			  "mul": "0.0244",
+			  "div": "1",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "APP",
+			  "offset": "12",
+			  "storagetype": "uint16",
+			  "mul": "100",
+			  "div": "65535",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "Load",
+			  "offset": "14",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "42",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "AIR",
+			  "offset": "16",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "10",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "AFR_ECM",
+			  "offset": "18",
+			  "storagetype": "uint8",
+			  "mul": "14.7",
+			  "div": "128",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "ADC_LAM1",
+			  "offset": "19",
+			  "storagetype": "uint8",
+			  "mul": "1",
+			  "div": "200",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "Period_LAM1",
+			  "offset": "20",
+			  "storagetype": "uint8",
+			  "mul": "1",
+			  "div": "100",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "ADC_LAM2",
+			  "offset": "21",
+			  "storagetype": "uint8",
+			  "mul": "1",
+			  "div": "200",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "COEFF",
+			  "offset": "22",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "32768",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "Fact_Vis_Corr",
+			  "offset": "24",
+			  "storagetype": "uint8",
+			  "mul": "1",
+			  "div": "64",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "Adapt_otkl_Air",
+			  "offset": "25",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "2500",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "Mult_Corr",
+			  "offset": "27",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "32768",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "moment_app",
+			  "offset": "29",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "1",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "FHO",
+			  "offset": "31",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "1",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "opt_moment",
+			  "offset": "36",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "500",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "user_word3",
+			  "offset": "46",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "500",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "Torque_JUFR",
+			  "offset": "36",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "500",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "GBC_TORQ",
+			  "offset": "40",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "16",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "GBC",
+			  "offset": "60",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "16",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "Pressure",
+			  "offset": "62",
+			  "storagetype": "uint16",
+			  "mul": "1",
+			  "div": "16",
+			  "subb": "0",
+			  "flag_bit": "0"
+			},
+			{
+			  "name": "F_PUMP",
+			  "offset": "51",
+			  "storagetype": "uint8",
+			  "mul": "1",
+			  "div": "1",
+			  "subb": "0",
+			  "flag_bit": "1"
+			},
+			{
+			  "name": "WBO",
+			  "offset": "64",
+			  "storagetype": "uint8",
+			  "mul": "1",
+			  "div": "10",
+			  "subb": "0",
+			  "flag_bit": "0"
+			}
+		  ]
+		}
+	]
+}

@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.StdCtrls, uDiag,
-  uJ2534_v2, uWBO, Vcl.CheckLst, Vcl.ExtCtrls;
+  uJ2534_v2, uWBO, Vcl.CheckLst, Vcl.ExtCtrls, uJsonData;
 
 type
   TMainForm = class(TForm)
@@ -27,12 +27,14 @@ type
     Button2: TButton;
     CBPortWbo: TComboBox;
     Timer1: TTimer;
+    Button3: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ButtonConnectClick(Sender: TObject);
     procedure ButtonSetDiagClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
   private
     { Private declarations }
     StringListDll: TstringList;
@@ -46,6 +48,7 @@ type
     procedure get_list_param;
     procedure StartDiag;
     function StrToFloatD(s: string): real; overload;
+    procedure LoadAndParseJsonExample;
   public
     { Public declarations }
   end;
@@ -112,6 +115,11 @@ procedure TMainForm.Button2Click(Sender: TObject);
 begin
   Wbo.Start(CBWbo.ItemIndex, self.CBPortWbo.Text);
   Timer1.Enabled := True;
+end;
+
+procedure TMainForm.Button3Click(Sender: TObject);
+begin
+  LoadAndParseJsonExample;
 end;
 
 procedure TMainForm.ButtonConnectClick(Sender: TObject);
@@ -223,6 +231,28 @@ begin
       Memo1.Lines.Add(format('message : %s , AFR : %g', [Wbo.MessageWbo, Wbo.AFR]));
       Wbo.NewData := False;
     end;
+  end;
+end;
+
+procedure TMainForm.LoadAndParseJsonExample;
+var
+  JsonData: TJsonData;
+  DataArrays: TDataArrayList;
+  i, j: integer;
+begin
+  JsonData := TJsonData.Create;
+  try
+    // Load from file
+    JsonData.LoadFromFile('D:\distr\distr\project_2022\M86OLT\Win32\Debug\param\param.json');
+
+    // Or load from string
+    // JsonData.LoadFromString('{"data": [...]}');
+
+    // Parse data
+    DataArrays := JsonData.LoadDataArrays;
+
+  finally
+    JsonData.Free;
   end;
 end;
 

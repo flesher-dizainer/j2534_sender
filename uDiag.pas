@@ -5,7 +5,7 @@ interface
 uses
   Windows, SysUtils, Classes, uJ2534_v2, StrUtils, IOUtils, Xml.XMLDoc,
   Xml.xmldom,
-  Xml.XMLIntf, dialogs, Vcl.StdCtrls;
+  Xml.XMLIntf, dialogs, Vcl.StdCtrls, System.JSON;
 
 type
   TParam = record
